@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/wewe5215/Desktop/PP/hw1/sample",
+      "program": "/Users/wewe5215/Desktop/PP/hw1/sample/build/Debug/outDebug"
+    }
+  ]
+}
