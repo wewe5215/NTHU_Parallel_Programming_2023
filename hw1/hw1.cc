@@ -71,15 +71,15 @@ int main(int argc, char **argv)
     float* data = new float[data_to_solve];
     float* number_buffer_prev = new float[n / size + 1];
     float* number_buffer_next = new float[n / size + 1];
-    MPI_File_open(MPI_COMM_WORLD, input_filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &input_file);
-    MPI_File_read_at(input_file, sizeof(float) * start_offset, data, 1, MPI_FLOAT, MPI_STATUS_IGNORE);
+    MPI_File_open(new_comm, input_filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &input_file);
+    MPI_File_read_at(input_file, sizeof(float) * start_offset, data, data_to_solve, MPI_FLOAT, MPI_STATUS_IGNORE);
     MPI_File_close(&input_file);
     // sort local data first
     // [TODO] : optimize sorting algorithm
     float* first(&data[0]);
     float* last(first + data_to_solve);
-    // std::sort(first, last);
-    boost::sort::spreadsort::float_sort(first, last);
+    std::sort(first, last);
+    // boost::sort::spreadsort::float_sort(first, last);
     int round = size + 1;
     // odd even sort
     /*  [TODO] :
@@ -87,14 +87,22 @@ int main(int argc, char **argv)
         and decide to swap the content or not
     */
    if(DEBUG_MODE){
-        printf("here is rank %d\n", rank);
+        // if(data_to_solve == 1){
+        //     printf("here is rank %d initial value\ndata[0] = %f\n\n", rank,  data[0]); 
+        // }
+        // else if (data_to_solve == 2){
+        //     printf("here is rank %d initial value\ndata[0] = %f, data[1] = %f\n\n", rank,  data[0], data[1]); 
+        // }
+        // else if(data_to_solve == 3)
+        //    printf("here is rank %d initial value\ndata[0] = %f, data[1] = %f, data[2] = %f\n\n", rank,  data[0], data[1], data[2]);
+        printf("this is rank %d initial value\n", rank);
         for(int i = 0; i < data_to_solve; i ++){
             printf("data[%d] = %f\n", i, data[i]);
         }
-        printf("\n\n");
+   
    }
     while(round --){
-        if((rank % 2 == 0) && (rank != size - 1)){
+        if((rank % 2 == 0) && (rank != size - 1) && rank < n){
             /*
                 For each process with rank P-1, 
                 compare its number with the number sent by the process with rank P and 
@@ -113,14 +121,21 @@ int main(int argc, char **argv)
             if(number_buffer_next[0] < data[data_to_solve - 1]){
                 if(DEBUG_MODE)printf("swapping 1!\n");
                 for(i = 0; i < data_to_solve; i ++){
-                    if(number_buffer_next[neighbor] <= data[now]){
-                        temp[i] = number_buffer_next[neighbor];
-                        neighbor ++;
+                    if(neighbor < data_to_solve_next){
+                        if(number_buffer_next[neighbor] <= data[now]){
+                            temp[i] = number_buffer_next[neighbor];
+                            neighbor ++;
+                        }
+                        else{
+                            temp[i] = data[now];
+                            now ++;
+                        }
                     }
                     else{
                         temp[i] = data[now];
                         now ++;
                     }
+                    
                 }
                 std::swap(temp, data);
                 if(DEBUG_MODE){
@@ -135,32 +150,35 @@ int main(int argc, char **argv)
 
         }
 
-        else if((rank % 2 == 1)){
+        else if((rank % 2 == 1) && (rank != 0) && rank < n){
             /*For each process with odd rank P, send its number to the process with rank P-1*/
             int data_to_solve_prev = n / size + (rank - 1 < n % size);
             MPI_Sendrecv(data, data_to_solve, MPI_FLOAT, rank - 1, 0,
                         number_buffer_prev, data_to_solve_prev, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
-            int i = 0, now = 0, neighbor = 0;
+            int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
             float* temp = new float[data_to_solve];
             if(DEBUG_MODE){
                 printf("number_buffer_prev[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer_prev[data_to_solve_prev - 1], data[0]);
             }
-            if(number_buffer_prev[n / size + (rank - 1 < n % size) - 1] > data[0]){
+            if(number_buffer_prev[data_to_solve_prev - 1] > data[0]){
                 if(DEBUG_MODE)printf("swapping 2!\n");
-                if(data_to_solve == data_to_solve_prev){
-                    for(i = 0 ; i < data_to_solve; i ++){
-                        if(number_buffer_prev[neighbor] >= data[now]){
-                            temp[i] = number_buffer_prev[neighbor];
-                            neighbor ++;
+                
+                for(i = data_to_solve - 1 ; i >= 0; i --){
+                    if(number_buffer_prev[neighbor] >= data[now] && neighbor >= 0){
+                        if(DEBUG_MODE){
+                            printf("number_buffer_prev[neighbor] = %f, data[now] = %f\n", number_buffer_prev[neighbor], data[now]);
                         }
-                        else{
-                            temp[i] = data[now];
-                            now ++;
-                        }
+                        temp[i] = number_buffer_prev[neighbor];
+                        neighbor --;
+                    }
+                    else{
+                        temp[i] = data[now];
+                        now --;
                     }
                 }
+                
                 
                 std::swap(temp, data);
                 if(DEBUG_MODE){
@@ -174,28 +192,31 @@ int main(int argc, char **argv)
             
         }
 
-        if((rank % 2 == 0) && (rank != 0)){
+        if((rank % 2 == 0) && (rank != 0) && rank < n){
             /*For each process with even rank Q, send its number to the process with rank Q-1*/
             int data_to_solve_prev = n / size + (rank - 1 < n % size);
             MPI_Sendrecv(data, data_to_solve, MPI_FLOAT, rank - 1, 0,
                         number_buffer_prev, data_to_solve_prev, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
-            int i = 0, now = 0, neighbor = 0;
+            int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
             float* temp = new float[data_to_solve];
             if(DEBUG_MODE){
                 printf("number_buffer_prev[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer_prev[data_to_solve_prev - 1], data[0]);
             }
             if(number_buffer_prev[n / size + (rank - 1 < n % size) - 1] > data[0]){
                 if(DEBUG_MODE)printf("swapping 3!\n");
-                for(i = 0 ; i < data_to_solve; i ++){
-                    if(number_buffer_prev[neighbor] >= data[now]){
+                for(i = data_to_solve - 1 ; i >= 0; i --){
+                    if(number_buffer_prev[neighbor] >= data[now] && neighbor >= 0){
+                        if(DEBUG_MODE){
+                            printf("number_buffer_prev[neighbor] = %f, data[now] = %f\n", number_buffer_prev[neighbor], data[now]);
+                        }
                         temp[i] = number_buffer_prev[neighbor];
-                        neighbor ++;
+                        neighbor --;
                     }
                     else{
                         temp[i] = data[now];
-                        now ++;
+                        now --;
                     }
                 }
                 std::swap(temp, data);
@@ -208,7 +229,7 @@ int main(int argc, char **argv)
             }
             
         }
-        else if((rank % 2 == 1) && (rank != size - 1)){
+        else if((rank % 2 == 1) && (rank != size - 1) && rank < n){
             /*
                 For each process with rank Q-1, 
                 compare its number with the number sent by the process with rank Q and 
@@ -227,14 +248,21 @@ int main(int argc, char **argv)
             if(number_buffer_next[0] < data[data_to_solve - 1]){
                 if(DEBUG_MODE)printf("swapping 4!\n");
                 for(i = 0; i < data_to_solve; i ++){
-                    if(number_buffer_next[neighbor] <= data[now]){
-                        temp[i] = number_buffer_next[neighbor];
-                        neighbor ++;
+                    if(neighbor < data_to_solve_next){
+                        if(number_buffer_next[neighbor] <= data[now]){
+                            temp[i] = number_buffer_next[neighbor];
+                            neighbor ++;
+                        }
+                        else{
+                            temp[i] = data[now];
+                            now ++;
+                        }
                     }
                     else{
                         temp[i] = data[now];
                         now ++;
                     }
+                    
                 }
                 std::swap(temp, data);
                 if(DEBUG_MODE){
@@ -249,8 +277,8 @@ int main(int argc, char **argv)
     }
     delete[] number_buffer_prev;
     delete[] number_buffer_next;
-    MPI_File_open(MPI_COMM_WORLD, output_filename, MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &output_file);
-    MPI_File_write_at(output_file, sizeof(float) * start_offset, data, 1, MPI_FLOAT, MPI_STATUS_IGNORE);
+    MPI_File_open(new_comm, output_filename, MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &output_file);
+    MPI_File_write_at(output_file, sizeof(float) * start_offset, data, data_to_solve, MPI_FLOAT, MPI_STATUS_IGNORE);
     MPI_File_close(&output_file);
 
     if(DEBUG_MODE){
