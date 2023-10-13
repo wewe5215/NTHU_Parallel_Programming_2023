@@ -3,7 +3,7 @@
 #include <mpi.h>
 #include <algorithm>
 #include <boost/sort/spreadsort/float_sort.hpp>
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 int main(int argc, char **argv)
 {
     if (argc != 4) {
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
     float* last(first + data_to_solve);
     std::sort(first, last);
     // boost::sort::spreadsort::float_sort(first, last);
-    int round = size + 1;
+    int round = size / 2 + 1;
     // odd even sort
     /*  [TODO] :
         since every local data are sorted, we can send the marginal data first
@@ -101,6 +101,7 @@ int main(int argc, char **argv)
         }
    
    }
+    bool swap = false;
     while(round --){
         if((rank % 2 == 0) && (rank != size - 1) && rank < n){
             /*
@@ -109,8 +110,8 @@ int main(int argc, char **argv)
                 send the larger one back to the process with rank P
             */
             int data_to_solve_next = n / size + (rank + 1 < n % size);
-            MPI_Sendrecv(data, data_to_solve, MPI_FLOAT, rank + 1, 0,
-                        number_buffer_next, data_to_solve_next, MPI_FLOAT, rank + 1, 0,
+            MPI_Sendrecv(data + data_to_solve - 1, 1, MPI_FLOAT, rank + 1, 0,
+                        number_buffer_next, 1, MPI_FLOAT, rank + 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = 0, neighbor = 0;
@@ -119,6 +120,10 @@ int main(int argc, char **argv)
                 printf("number_buffer_next[0] = %f, data[data_to_solve - 1] = %f\n", number_buffer_next[0], data[data_to_solve - 1]);
             }
             if(number_buffer_next[0] < data[data_to_solve - 1]){
+                MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
+                            number_buffer_next + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
+                            new_comm, MPI_STATUS_IGNORE
+                );
                 if(DEBUG_MODE)printf("swapping 1!\n");
                 for(i = 0; i < data_to_solve; i ++){
                     if(neighbor < data_to_solve_next){
@@ -138,6 +143,7 @@ int main(int argc, char **argv)
                     
                 }
                 std::swap(temp, data);
+                swap = true;
                 if(DEBUG_MODE){
                     printf("here is rank %d\n", rank);
                     for(int i = 0; i < data_to_solve; i ++){
@@ -153,8 +159,8 @@ int main(int argc, char **argv)
         else if((rank % 2 == 1) && (rank != 0) && rank < n){
             /*For each process with odd rank P, send its number to the process with rank P-1*/
             int data_to_solve_prev = n / size + (rank - 1 < n % size);
-            MPI_Sendrecv(data, data_to_solve, MPI_FLOAT, rank - 1, 0,
-                        number_buffer_prev, data_to_solve_prev, MPI_FLOAT, rank - 1, 0,
+            MPI_Sendrecv(data, 1, MPI_FLOAT, rank - 1, 0,
+                        number_buffer_prev + data_to_solve_prev - 1, 1, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
@@ -164,7 +170,10 @@ int main(int argc, char **argv)
             }
             if(number_buffer_prev[data_to_solve_prev - 1] > data[0]){
                 if(DEBUG_MODE)printf("swapping 2!\n");
-                
+                MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
+                        number_buffer_prev, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
+                        new_comm, MPI_STATUS_IGNORE
+                );
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer_prev[neighbor] >= data[now] && neighbor >= 0){
                         if(DEBUG_MODE){
@@ -181,6 +190,7 @@ int main(int argc, char **argv)
                 
                 
                 std::swap(temp, data);
+                swap = true;
                 if(DEBUG_MODE){
                     printf("here is rank %d\n", rank);
                     for(int i = 0; i < data_to_solve; i ++){
@@ -195,8 +205,8 @@ int main(int argc, char **argv)
         if((rank % 2 == 0) && (rank != 0) && rank < n){
             /*For each process with even rank Q, send its number to the process with rank Q-1*/
             int data_to_solve_prev = n / size + (rank - 1 < n % size);
-            MPI_Sendrecv(data, data_to_solve, MPI_FLOAT, rank - 1, 0,
-                        number_buffer_prev, data_to_solve_prev, MPI_FLOAT, rank - 1, 0,
+            MPI_Sendrecv(data, 1, MPI_FLOAT, rank - 1, 0,
+                        number_buffer_prev + data_to_solve_prev - 1, 1, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
@@ -204,8 +214,12 @@ int main(int argc, char **argv)
             if(DEBUG_MODE){
                 printf("number_buffer_prev[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer_prev[data_to_solve_prev - 1], data[0]);
             }
-            if(number_buffer_prev[n / size + (rank - 1 < n % size) - 1] > data[0]){
+            if(number_buffer_prev[data_to_solve_prev - 1] > data[0]){
                 if(DEBUG_MODE)printf("swapping 3!\n");
+                MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
+                            number_buffer_prev, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
+                            new_comm, MPI_STATUS_IGNORE
+                );
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer_prev[neighbor] >= data[now] && neighbor >= 0){
                         if(DEBUG_MODE){
@@ -220,6 +234,7 @@ int main(int argc, char **argv)
                     }
                 }
                 std::swap(temp, data);
+                swap = true;
                 if(DEBUG_MODE){
                     printf("here is rank %d\n", rank);
                     for(int i = 0; i < data_to_solve; i ++){
@@ -236,8 +251,8 @@ int main(int argc, char **argv)
                 send the larger one back to the process with rank Q
             */
             int data_to_solve_next = n / size + (rank + 1 < n % size);
-            MPI_Sendrecv(data, data_to_solve, MPI_FLOAT, rank + 1, 0,
-                        number_buffer_next, data_to_solve_next, MPI_FLOAT, rank + 1, 0,
+            MPI_Sendrecv(data + data_to_solve - 1, 1, MPI_FLOAT, rank + 1, 0,
+                        number_buffer_next, 1, MPI_FLOAT, rank + 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = 0, neighbor = 0;
@@ -246,6 +261,10 @@ int main(int argc, char **argv)
                 printf("number_buffer_next[0] = %f, data[data_to_solve - 1] = %f\n", number_buffer_next[0], data[data_to_solve - 1]);
             }
             if(number_buffer_next[0] < data[data_to_solve - 1]){
+                MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
+                            number_buffer_next + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
+                            new_comm, MPI_STATUS_IGNORE
+                );
                 if(DEBUG_MODE)printf("swapping 4!\n");
                 for(i = 0; i < data_to_solve; i ++){
                     if(neighbor < data_to_solve_next){
@@ -265,6 +284,7 @@ int main(int argc, char **argv)
                     
                 }
                 std::swap(temp, data);
+                swap = true;
                 if(DEBUG_MODE){
                     printf("here is rank %d\n", rank);
                     for(int i = 0; i < data_to_solve; i ++){
