@@ -4,71 +4,82 @@
 #include <algorithm>
 #include <boost/sort/spreadsort/float_sort.hpp>
 #define DEBUG_MODE 0
+#define _0(x)	(x & 0xFF)
+#define _1(x)	((x >> 8) & 0xFF)
+#define _2(x)	((x >> 16) & 0xFF)
+#define _3(x)	(x >> 24)
+// https://stackoverflow.com/questions/4640906/radix-sort-sorting-a-float-data
+// http://stereopsis.com/radix.html
+
 static inline unsigned int Float2Int(float input){
-	unsigned int f = *(unsigned int *)&input;
-	unsigned int mask = -int(f >> 31) | 0x80000000; 
-	return f ^ mask;
+	unsigned int ret = *(unsigned int*)&input;
+    ret ^= -(ret >> 31) | 0x80000000;
+    return ret;
 }
 
-static inline float Int2Float(unsigned int f){ 
-	unsigned int mask = ((f >> 31) - 1) | 0x80000000;
-	unsigned ret = mask ^ f;
-	return *(float *)&(ret);
+static inline float Int2Float(unsigned int input){ 
+	input ^= ((input >> 31) - 1) | 0x80000000;
+    return *(float*)&input;
 }
+//[TODO] :optimize radix sort
+void radix_sort(float* data, int n)
+{
+	unsigned int* array = (unsigned int*)malloc(n * sizeof(unsigned int));
+	unsigned int* sort = (unsigned int*)malloc(n * sizeof(unsigned int));
 
-void radix_sort(float* input_data,int size){
-
-	unsigned int* arr = (unsigned int*)malloc((size + 5) * sizeof(unsigned int));
-	unsigned int* sort = (unsigned int*)malloc((size + 5) * sizeof(unsigned int));
-	
-
-	const int kHist = 65536;
-	unsigned int b0[kHist * 2];
-
+	// 4 histograms on the stack:
+	const unsigned int kHist = 256;
+	unsigned int b0[kHist * 4 + 5];
 	unsigned int *b1 = b0 + kHist;
+	unsigned int *b2 = b1 + kHist;
+    unsigned int *b3 = b2 + kHist;
 
-	memset(b0, 0, sizeof(unsigned int)* kHist * 2 );
-
-	for (int i = 0; i < size; i++) {
-		unsigned int fi = Float2Int(input_data[i]);
-		arr[i] = fi;
-		b0[fi & 0xFFFF] ++; // 0 ~ 15
-		b1[fi >> 16 ] ++;   // 16 ~ 32
+	memset(b0, 0, sizeof(unsigned int) * (kHist * 4 + 5));
+	for(int i = 0; i < n; i++){
+		array[i] = Float2Int(data[i]);
+		b0[_0(array[i])]++;
+		b1[_1(array[i])]++;
+		b2[_2(array[i])]++;
+        b3[_3(array[i])]++;
 	}
-	
-	
-	
-    unsigned int sum0 = 0, sum1 = 0;	
-    for (int i = 0; i < kHist; i++) {
-        unsigned int tsum;
-        tsum = b0[i] + sum0;
-        b0[i] = sum0;
-        sum0 = tsum;
-        tsum = b1[i] + sum1;
-        b1[i] = sum1;
-        sum1 = tsum;
+
+    unsigned int sum0 = 0, sum1 = 0, sum2 = 0, sum3 = 0;
+    unsigned int temp;
+    for(int i = 0; i < kHist; i++){
+        temp = b0[i] + sum0;
+        b0[i] = sum0 - 1;
+        sum0 = temp;
+
+        temp = b1[i] + sum1;
+        b1[i] = sum1 - 1;
+        sum1 = temp;
+
+        temp = b2[i] + sum2;
+        b2[i] = sum2 - 1;
+        sum2 = temp;
+
+        temp = b3[i] + sum3;
+        b3[i] = sum3 - 1;
+        sum3 = temp;
     }
-	
 
-	//  counting sort for bit 0
-	for (int i = 0; i < size ; i++) {
-		unsigned int fi = arr[i];
-		unsigned int pos = fi & 0xFFFF;
-		sort[b0[pos]++] = fi;
+	for(int i = 0; i < n; i++){
+        sort[++b0[_0(array[i])]] = array[i];
 	}
 
-	// counting sort for bit 1
-	for (int i = 0; i < size; i++) {
-		unsigned int fi = sort[i];
-		unsigned int pos = (fi >> 16);
-		arr[b1[pos]++] = fi;
+	for(int i = 0; i < n; i++){
+        array[++b1[_1(sort[i])]] = sort[i];
 	}
 
-	for(int i = 0 ; i < size ; i++){
-		input_data[i] = Int2Float(arr[i]);
+	for(int i = 0; i < n; i++){
+        sort[++b2[_2(array[i])]] = array[i];
 	}
-	
-	free(arr);
+
+	for(int i = 0; i < n; i++){
+        data[++b3[_3(sort[i])]] = Int2Float(sort[i]);
+	}
+
+	free(array);
 	free(sort);
 }
 
@@ -133,9 +144,9 @@ int main(int argc, char **argv)
         data_to_solve = n / size;
         start_offset = rank * ( n / size ) + ( n % size );
     }
-    if(DEBUG_MODE){
-        printf("rank = %d, data_to_solve = %d, start offset = %d\n", rank, data_to_solve, start_offset);
-    }
+    // if(DEBUG_MODE){
+    //     printf("rank = %d, data_to_solve = %d, start offset = %d\n", rank, data_to_solve, start_offset);
+    // }
     float* data = (float*) malloc((data_to_solve) * sizeof(float));
     float* number_buffer = (float*) malloc((n / size + 1) * sizeof(float));
     MPI_File_open(new_comm, input_filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &input_file);
@@ -154,21 +165,21 @@ int main(int argc, char **argv)
         since every local data are sorted, we can send the marginal data first
         and decide to swap the content or not
     */
-   if(DEBUG_MODE){
-        // if(data_to_solve == 1){
-        //     printf("here is rank %d initial value\ndata[0] = %f\n\n", rank,  data[0]); 
-        // }
-        // else if (data_to_solve == 2){
-        //     printf("here is rank %d initial value\ndata[0] = %f, data[1] = %f\n\n", rank,  data[0], data[1]); 
-        // }
-        // else if(data_to_solve == 3)
-        //    printf("here is rank %d initial value\ndata[0] = %f, data[1] = %f, data[2] = %f\n\n", rank,  data[0], data[1], data[2]);
-        printf("this is rank %d initial value\n", rank);
-        for(int i = 0; i < data_to_solve; i ++){
-            printf("data[%d] = %f\n", i, data[i]);
-        }
+//    if(DEBUG_MODE){
+//         // if(data_to_solve == 1){
+//         //     printf("here is rank %d initial value\ndata[0] = %f\n\n", rank,  data[0]); 
+//         // }
+//         // else if (data_to_solve == 2){
+//         //     printf("here is rank %d initial value\ndata[0] = %f, data[1] = %f\n\n", rank,  data[0], data[1]); 
+//         // }
+//         // else if(data_to_solve == 3)
+//         //    printf("here is rank %d initial value\ndata[0] = %f, data[1] = %f, data[2] = %f\n\n", rank,  data[0], data[1], data[2]);
+//         // printf("this is rank %d initial value\n", rank);
+//         // for(int i = 0; i < data_to_solve; i ++){
+//         //     printf("data[%d] = %f\n", i, data[i]);
+//         // }
    
-   }
+//    }
     // bool swap = false;
     float* temp = (float*) malloc((data_to_solve) * sizeof(float));
     while(round --){
@@ -186,15 +197,15 @@ int main(int argc, char **argv)
             );
             int i = 0, now = 0, neighbor = 0;
             
-            if(DEBUG_MODE){
-                printf("number_buffer[0] = %f, data[data_to_solve - 1] = %f\n", number_buffer[0], data[data_to_solve - 1]);
-            }
+            // if(DEBUG_MODE){
+            //     printf("number_buffer[0] = %f, data[data_to_solve - 1] = %f\n", number_buffer[0], data[data_to_solve - 1]);
+            // }
             if(number_buffer[0] < data[data_to_solve - 1]){
                 MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
                             number_buffer + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
                             new_comm, MPI_STATUS_IGNORE
                 );
-                if(DEBUG_MODE)printf("swapping 1!\n");
+                // if(DEBUG_MODE)printf("swapping 1!\n");
                 for(i = 0; i < data_to_solve; i ++){
                     if(neighbor < data_to_solve_next){
                         if(number_buffer[neighbor] <= data[now]){
@@ -214,12 +225,12 @@ int main(int argc, char **argv)
                 }
                 std::swap(temp, data);
                 
-                if(DEBUG_MODE){
-                    printf("here is rank %d\n", rank);
-                    for(int i = 0; i < data_to_solve; i ++){
-                        printf("data[%d] = %f\n", i, data[i]);
-                    }
-                }
+                // if(DEBUG_MODE){
+                //     printf("here is rank %d\n", rank);
+                //     for(int i = 0; i < data_to_solve; i ++){
+                //         printf("data[%d] = %f\n", i, data[i]);
+                //     }
+                // }
             }
             
             
@@ -234,20 +245,20 @@ int main(int argc, char **argv)
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
-            if(DEBUG_MODE){
-                printf("number_buffer[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer[data_to_solve_prev - 1], data[0]);
-            }
+            // if(DEBUG_MODE){
+            //     printf("number_buffer[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer[data_to_solve_prev - 1], data[0]);
+            // }
             if(number_buffer[data_to_solve_prev - 1] > data[0]){
-                if(DEBUG_MODE)printf("swapping 2!\n");
+                // if(DEBUG_MODE)printf("swapping 2!\n");
                 MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
                         number_buffer, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
                 );
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer[neighbor] >= data[now] && neighbor >= 0){
-                        if(DEBUG_MODE){
-                            printf("number_buffer[neighbor] = %f, data[now] = %f\n", number_buffer[neighbor], data[now]);
-                        }
+                        // if(DEBUG_MODE){
+                        //     printf("number_buffer[neighbor] = %f, data[now] = %f\n", number_buffer[neighbor], data[now]);
+                        // }
                         temp[i] = number_buffer[neighbor];
                         neighbor --;
                     }
@@ -260,12 +271,12 @@ int main(int argc, char **argv)
                 
                 std::swap(temp, data);
                 
-                if(DEBUG_MODE){
-                    printf("here is rank %d\n", rank);
-                    for(int i = 0; i < data_to_solve; i ++){
-                        printf("data[%d] = %f\n", i, data[i]);
-                    }
-                }
+                // if(DEBUG_MODE){
+                //     printf("here is rank %d\n", rank);
+                //     for(int i = 0; i < data_to_solve; i ++){
+                //         printf("data[%d] = %f\n", i, data[i]);
+                //     }
+                // }
             }
             
             
@@ -280,20 +291,20 @@ int main(int argc, char **argv)
             );
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
     
-            if(DEBUG_MODE){
-                printf("number_buffer[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer[data_to_solve_prev - 1], data[0]);
-            }
+            // if(DEBUG_MODE){
+            //     printf("number_buffer[data_to_solve_prev] = %f, data[0] = %f\n", number_buffer[data_to_solve_prev - 1], data[0]);
+            // }
             if(number_buffer[data_to_solve_prev - 1] > data[0]){
-                if(DEBUG_MODE)printf("swapping 3!\n");
+                // if(DEBUG_MODE)printf("swapping 3!\n");
                 MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
                             number_buffer, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
                             new_comm, MPI_STATUS_IGNORE
                 );
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer[neighbor] >= data[now] && neighbor >= 0){
-                        if(DEBUG_MODE){
-                            printf("number_buffer[neighbor] = %f, data[now] = %f\n", number_buffer[neighbor], data[now]);
-                        }
+                        // if(DEBUG_MODE){
+                        //     printf("number_buffer[neighbor] = %f, data[now] = %f\n", number_buffer[neighbor], data[now]);
+                        // }
                         temp[i] = number_buffer[neighbor];
                         neighbor --;
                     }
@@ -304,12 +315,12 @@ int main(int argc, char **argv)
                 }
                 std::swap(temp, data);
                 
-                if(DEBUG_MODE){
-                    printf("here is rank %d\n", rank);
-                    for(int i = 0; i < data_to_solve; i ++){
-                        printf("data[%d] = %f\n", i, data[i]);
-                    }
-                }
+                // if(DEBUG_MODE){
+                //     printf("here is rank %d\n", rank);
+                //     for(int i = 0; i < data_to_solve; i ++){
+                //         printf("data[%d] = %f\n", i, data[i]);
+                //     }
+                // }
             }
             
         }
@@ -326,15 +337,15 @@ int main(int argc, char **argv)
             );
             int i = 0, now = 0, neighbor = 0;
        
-            if(DEBUG_MODE){
-                printf("number_buffer[0] = %f, data[data_to_solve - 1] = %f\n", number_buffer[0], data[data_to_solve - 1]);
-            }
+            // if(DEBUG_MODE){
+            //     printf("number_buffer[0] = %f, data[data_to_solve - 1] = %f\n", number_buffer[0], data[data_to_solve - 1]);
+            // }
             if(number_buffer[0] < data[data_to_solve - 1]){
                 MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
                             number_buffer + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
                             new_comm, MPI_STATUS_IGNORE
                 );
-                if(DEBUG_MODE)printf("swapping 4!\n");
+                // if(DEBUG_MODE)printf("swapping 4!\n");
                 for(i = 0; i < data_to_solve; i ++){
                     if(neighbor < data_to_solve_next){
                         if(number_buffer[neighbor] <= data[now]){
@@ -354,28 +365,28 @@ int main(int argc, char **argv)
                 }
                 std::swap(temp, data);
                 
-                if(DEBUG_MODE){
-                    printf("here is rank %d\n", rank);
-                    for(int i = 0; i < data_to_solve; i ++){
-                        printf("data[%d] = %f\n", i, data[i]);
-                    }
-                }
+                // if(DEBUG_MODE){
+                //     printf("here is rank %d\n", rank);
+                //     for(int i = 0; i < data_to_solve; i ++){
+                //         printf("data[%d] = %f\n", i, data[i]);
+                //     }
+                // }
             }
             
         }
     }
-    delete[] number_buffer;
-    delete[] temp;
+    free(number_buffer);
+    free(temp);
     MPI_File_open(new_comm, output_filename, MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &output_file);
     MPI_File_write_at(output_file, sizeof(float) * start_offset, data, data_to_solve, MPI_FLOAT, MPI_STATUS_IGNORE);
     MPI_File_close(&output_file);
 
-    if(DEBUG_MODE){
-        printf("here is rank %d\n", rank);
-        for(int i = 0; i < data_to_solve; i ++){
-            printf("data[%d] = %f\n", i, data[i]);
-        }
-    }
+    // if(DEBUG_MODE){
+    //     printf("here is rank %d\n", rank);
+    //     for(int i = 0; i < data_to_solve; i ++){
+    //         printf("data[%d] = %f\n", i, data[i]);
+    //     }
+    // }
     MPI_Finalize();
     return 0;
 }
