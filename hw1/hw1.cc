@@ -4,17 +4,20 @@
 #include <algorithm>
 #include <boost/sort/spreadsort/float_sort.hpp>
 #define DEBUG_MODE 0
+#define EXPR_MODE 1
 #define _0(x)	(x & 0xFF)
 #define _1(x)	((x >> 8) & 0xFF)
 #define _2(x)	((x >> 16) & 0xFF)
 #define _3(x)	(x >> 24)
+
+
 static inline unsigned int Float2Int(float input){
 	unsigned int ret = *(unsigned int*)&input;
     ret ^= -(ret >> 31) | 0x80000000;
     return ret;
 }
 
-static inline float Int2Float(unsigned int input){
+static inline float Int2Float(unsigned int input){ 
 	input ^= ((input >> 31) - 1) | 0x80000000;
     return *(float*)&input;
 }
@@ -89,6 +92,10 @@ int main(int argc, char **argv)
 
     int rc;
     rc = MPI_Init(&argc, &argv);
+    double start_time;
+    if(EXPR_MODE){
+        start_time = MPI_Wtime();
+    }
     if (rc != MPI_SUCCESS) {
         printf ("Error starting MPI program. Terminating.\n"); 
         MPI_Abort (MPI_COMM_WORLD, rc);
@@ -121,6 +128,7 @@ int main(int argc, char **argv)
     } else {
         new_comm = MPI_COMM_WORLD;
     }
+    
     int data_to_solve, start_offset;
     if(rank < n % size){
         data_to_solve = n / size + 1;
@@ -131,11 +139,22 @@ int main(int argc, char **argv)
         data_to_solve = n / size;
         start_offset = rank * ( n / size ) + ( n % size );
     }
+    
     float* data = (float*) malloc((data_to_solve) * sizeof(float));
     float* number_buffer = (float*) malloc((n / size + 1) * sizeof(float));
+    double io_time;
+    if(EXPR_MODE){
+        // I/O start
+        io_time = MPI_Wtime();
+    }
     MPI_File_open(new_comm, input_filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &input_file);
     MPI_File_read_at(input_file, sizeof(float) * start_offset, data, data_to_solve, MPI_FLOAT, MPI_STATUS_IGNORE);
     MPI_File_close(&input_file);
+    if(EXPR_MODE){
+        // I/O end
+        io_time = MPI_Wtime() - io_time;
+    }
+    // radix_sort(data, data_to_solve);
     unsigned int* array = (unsigned int*)malloc(data_to_solve * sizeof(unsigned int));
 	unsigned int* sort = (unsigned int*)malloc(data_to_solve * sizeof(unsigned int));
 
@@ -197,14 +216,22 @@ int main(int argc, char **argv)
     int round = size / 2 + 1;
 
     float* temp = (float*) malloc((data_to_solve) * sizeof(float));
+    double communication_time;
+    if(EXPR_MODE){
+        // communication time start
+        communication_time = MPI_Wtime();
+    }
     while(round --){
+        
         if((rank % 2 == 0) && (rank != size - 1) && rank < n){
+            
             int data_to_solve_next = n / size + (rank + 1 < n % size);
             MPI_Sendrecv(data + data_to_solve - 1, 1, MPI_FLOAT, rank + 1, 0,
                         number_buffer, 1, MPI_FLOAT, rank + 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = 0, neighbor = 0;
+            
             if(number_buffer[0] < data[data_to_solve - 1]){
                 MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
                             number_buffer + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
@@ -225,9 +252,13 @@ int main(int argc, char **argv)
                         temp[i] = data[now];
                         now ++;
                     }
+                    
                 }
                 std::swap(temp, data);
+                
             }
+            
+            
 
         }
 
@@ -245,6 +276,7 @@ int main(int argc, char **argv)
                 );
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer[neighbor] >= data[now] && neighbor >= 0){
+                        
                         temp[i] = number_buffer[neighbor];
                         neighbor --;
                     }
@@ -253,8 +285,12 @@ int main(int argc, char **argv)
                         now --;
                     }
                 }
+                
+                
                 std::swap(temp, data);
             }
+            
+            
         }
 
         if((rank % 2 == 0) && (rank != 0) && rank < n){
@@ -264,6 +300,7 @@ int main(int argc, char **argv)
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
+    
             if(number_buffer[data_to_solve_prev - 1] > data[0]){
                 MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
                             number_buffer, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
@@ -280,15 +317,19 @@ int main(int argc, char **argv)
                     }
                 }
                 std::swap(temp, data);
+                
             }
+            
         }
         else if((rank % 2 == 1) && (rank != size - 1) && rank < n){
+            
             int data_to_solve_next = n / size + (rank + 1 < n % size);
             MPI_Sendrecv(data + data_to_solve - 1, 1, MPI_FLOAT, rank + 1, 0,
                         number_buffer, 1, MPI_FLOAT, rank + 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
             int i = 0, now = 0, neighbor = 0;
+       
             if(number_buffer[0] < data[data_to_solve - 1]){
                 MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
                             number_buffer + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
@@ -309,16 +350,39 @@ int main(int argc, char **argv)
                         temp[i] = data[now];
                         now ++;
                     }
+                    
                 }
                 std::swap(temp, data);
+                
             }
+            
         }
+    }
+    if(EXPR_MODE){
+        // communication time end
+        communication_time = MPI_Wtime() - communication_time;
     }
     free(number_buffer);
     free(temp);
+    double io_time_tmp;
+    if(EXPR_MODE){
+        // I/O start
+        io_time_tmp = MPI_Wtime();
+    }
     MPI_File_open(new_comm, output_filename, MPI_MODE_CREATE|MPI_MODE_WRONLY, MPI_INFO_NULL, &output_file);
     MPI_File_write_at(output_file, sizeof(float) * start_offset, data, data_to_solve, MPI_FLOAT, MPI_STATUS_IGNORE);
     MPI_File_close(&output_file);
+    if(EXPR_MODE){
+        // I/O start
+        // [TODO] : final time - io time - communication time = computation time
+        double final_time = MPI_Wtime();
+        io_time_tmp = final_time - io_time_tmp;
+        io_time += io_time_tmp;
+        final_time -= start_time;
+        double comp = final_time - io_time - communication_time;
+        printf("I/O time = %f\nComputation time = %f\nCommunication time = %f\nElapsed time = %f\n", \
+        io_time, comp, communication_time, final_time);
+    }
     MPI_Finalize();
     return 0;
 }
