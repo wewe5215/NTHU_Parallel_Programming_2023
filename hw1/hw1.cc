@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 
     MPI_File input_file, output_file;
 
-    MPI_Comm new_comm;
+    MPI_Comm new_comm = MPI_COMM_WORLD;
 
     // If size is greater than n, shrink the communicator
     if (n < size) {
@@ -157,15 +157,14 @@ int main(int argc, char **argv)
     // radix_sort(data, data_to_solve);
     unsigned int* array = (unsigned int*)malloc(data_to_solve * sizeof(unsigned int));
 	unsigned int* sort = (unsigned int*)malloc(data_to_solve * sizeof(unsigned int));
-
-	// 4 histograms on the stack:
 	const unsigned int kHist = 256;
 	unsigned int b0[kHist * 4 + 5];
 	unsigned int *b1 = b0 + kHist;
 	unsigned int *b2 = b1 + kHist;
     unsigned int *b3 = b2 + kHist;
-
+    /* Reset counters */
 	memset(b0, 0, sizeof(unsigned int) * (kHist * 4 + 5));
+    /* counting */
 	for(int i = 0; i < data_to_solve; i++){
 		array[i] = Float2Int(data[i]);
 		b0[_0(array[i])]++;
@@ -173,41 +172,41 @@ int main(int argc, char **argv)
 		b2[_2(array[i])]++;
         b3[_3(array[i])]++;
 	}
-
+    /* prefix sums */
     unsigned int sum0 = 0, sum1 = 0, sum2 = 0, sum3 = 0;
     unsigned int tsum;
     for(int i = 0; i < kHist; i++){
         tsum = b0[i] + sum0;
-        b0[i] = sum0 - 1;
+        b0[i] = sum0;
         sum0 = tsum;
 
         tsum = b1[i] + sum1;
-        b1[i] = sum1 - 1;
+        b1[i] = sum1;
         sum1 = tsum;
 
         tsum = b2[i] + sum2;
-        b2[i] = sum2 - 1;
+        b2[i] = sum2;
         sum2 = tsum;
 
         tsum = b3[i] + sum3;
-        b3[i] = sum3 - 1;
+        b3[i] = sum3;
         sum3 = tsum;
     }
-
+    /* output */
 	for(int i = 0; i < data_to_solve; i++){
-        sort[++b0[_0(array[i])]] = array[i];
+        sort[b0[_0(array[i])]++] = array[i];
 	}
 
 	for(int i = 0; i < data_to_solve; i++){
-        array[++b1[_1(sort[i])]] = sort[i];
+        array[b1[_1(sort[i])]++] = sort[i];
 	}
 
 	for(int i = 0; i < data_to_solve; i++){
-        sort[++b2[_2(array[i])]] = array[i];
+        sort[b2[_2(array[i])]++] = array[i];
 	}
 
 	for(int i = 0; i < data_to_solve; i++){
-        data[++b3[_3(sort[i])]] = Int2Float(sort[i]);
+        data[b3[_3(sort[i])]++] = Int2Float(sort[i]);
 	}
 
 	free(array);
@@ -216,27 +215,41 @@ int main(int argc, char **argv)
     int round = size / 2 + 1;
 
     float* temp = (float*) malloc((data_to_solve) * sizeof(float));
-    double communication_time;
-    if(EXPR_MODE){
-        // communication time start
-        communication_time = MPI_Wtime();
-    }
+    double communication_time, communication_tmp;
+    
     while(round --){
         
         if((rank % 2 == 0) && (rank != size - 1) && rank < n){
             
             int data_to_solve_next = n / size + (rank + 1 < n % size);
+            if(EXPR_MODE){
+                // communication time start
+                communication_time = MPI_Wtime();
+            }
             MPI_Sendrecv(data + data_to_solve - 1, 1, MPI_FLOAT, rank + 1, 0,
                         number_buffer, 1, MPI_FLOAT, rank + 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
+            if(EXPR_MODE){
+                // communication time end
+                communication_time = MPI_Wtime() - communication_time;
+            }
             int i = 0, now = 0, neighbor = 0;
             
             if(number_buffer[0] < data[data_to_solve - 1]){
+                if(EXPR_MODE){
+                    // communication time start
+                    communication_tmp = MPI_Wtime();
+                }
                 MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
                             number_buffer + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
                             new_comm, MPI_STATUS_IGNORE
                 );
+                if(EXPR_MODE){
+                    // communication time end
+                    communication_tmp = MPI_Wtime() - communication_tmp;
+                    communication_time += communication_tmp;
+                }
                 for(i = 0; i < data_to_solve; i ++){
                     if(neighbor < data_to_solve_next){
                         if(number_buffer[neighbor] <= data[now]){
@@ -264,16 +277,34 @@ int main(int argc, char **argv)
 
         else if((rank % 2 == 1) && (rank != 0) && rank < n){
             int data_to_solve_prev = n / size + (rank - 1 < n % size);
+            if(EXPR_MODE){
+                // communication time start
+                communication_tmp = MPI_Wtime();
+            }
             MPI_Sendrecv(data, 1, MPI_FLOAT, rank - 1, 0,
                         number_buffer + data_to_solve_prev - 1, 1, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
+            if(EXPR_MODE){
+                // communication time end
+                communication_tmp = MPI_Wtime() - communication_tmp;
+                communication_time += communication_tmp;
+            }
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
             if(number_buffer[data_to_solve_prev - 1] > data[0]){
+                if(EXPR_MODE){
+                    // communication time start
+                    communication_tmp = MPI_Wtime();
+                }
                 MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
                         number_buffer, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
                 );
+                if(EXPR_MODE){
+                    // communication time end
+                    communication_tmp = MPI_Wtime() - communication_tmp;
+                    communication_time += communication_tmp;
+                }
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer[neighbor] >= data[now] && neighbor >= 0){
                         
@@ -295,17 +326,35 @@ int main(int argc, char **argv)
 
         if((rank % 2 == 0) && (rank != 0) && rank < n){
             int data_to_solve_prev = n / size + (rank - 1 < n % size);
+            if(EXPR_MODE){
+                // communication time start
+                communication_tmp = MPI_Wtime();
+            }
             MPI_Sendrecv(data, 1, MPI_FLOAT, rank - 1, 0,
                         number_buffer + data_to_solve_prev - 1, 1, MPI_FLOAT, rank - 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
+            if(EXPR_MODE){
+                // communication time end
+                communication_tmp = MPI_Wtime() - communication_tmp;
+                communication_time += communication_tmp;
+            }
             int i = 0, now = data_to_solve - 1, neighbor = data_to_solve_prev - 1;
     
             if(number_buffer[data_to_solve_prev - 1] > data[0]){
+                if(EXPR_MODE){
+                    // communication time start
+                    communication_tmp = MPI_Wtime();
+                }
                 MPI_Sendrecv(data + 1, data_to_solve - 1, MPI_FLOAT, rank - 1, 0,
                             number_buffer, data_to_solve_prev - 1, MPI_FLOAT, rank - 1, 0,
                             new_comm, MPI_STATUS_IGNORE
                 );
+                if(EXPR_MODE){
+                    // communication time end
+                    communication_tmp = MPI_Wtime() - communication_tmp;
+                    communication_time += communication_tmp;
+                }
                 for(i = data_to_solve - 1 ; i >= 0; i --){
                     if(number_buffer[neighbor] >= data[now] && neighbor >= 0){
                         temp[i] = number_buffer[neighbor];
@@ -324,17 +373,35 @@ int main(int argc, char **argv)
         else if((rank % 2 == 1) && (rank != size - 1) && rank < n){
             
             int data_to_solve_next = n / size + (rank + 1 < n % size);
+            if(EXPR_MODE){
+                // communication time start
+                communication_tmp = MPI_Wtime();
+            }
             MPI_Sendrecv(data + data_to_solve - 1, 1, MPI_FLOAT, rank + 1, 0,
                         number_buffer, 1, MPI_FLOAT, rank + 1, 0,
                         new_comm, MPI_STATUS_IGNORE
             );
+            if(EXPR_MODE){
+                // communication time end
+                communication_tmp = MPI_Wtime() - communication_tmp;
+                communication_time += communication_tmp;
+            }
             int i = 0, now = 0, neighbor = 0;
        
             if(number_buffer[0] < data[data_to_solve - 1]){
+                if(EXPR_MODE){
+                    // communication time start
+                    communication_tmp = MPI_Wtime();
+                }
                 MPI_Sendrecv(data, data_to_solve - 1, MPI_FLOAT, rank + 1, 0,
                             number_buffer + 1, data_to_solve_next - 1, MPI_FLOAT, rank + 1, 0,
                             new_comm, MPI_STATUS_IGNORE
                 );
+                if(EXPR_MODE){
+                    // communication time end
+                    communication_tmp = MPI_Wtime() - communication_tmp;
+                    communication_time += communication_tmp;
+                }
                 for(i = 0; i < data_to_solve; i ++){
                     if(neighbor < data_to_solve_next){
                         if(number_buffer[neighbor] <= data[now]){
@@ -357,10 +424,6 @@ int main(int argc, char **argv)
             }
             
         }
-    }
-    if(EXPR_MODE){
-        // communication time end
-        communication_time = MPI_Wtime() - communication_time;
     }
     free(number_buffer);
     free(temp);
