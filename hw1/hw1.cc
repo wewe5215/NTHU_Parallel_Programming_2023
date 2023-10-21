@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <boost/sort/spreadsort/float_sort.hpp>
 #define DEBUG_MODE 0
-#define EXPR_MODE 1
+#define EXPR_MODE 0
 #define _0(x)	(x & 0xFF)
 #define _1(x)	((x >> 8) & 0xFF)
 #define _2(x)	((x >> 16) & 0xFF)

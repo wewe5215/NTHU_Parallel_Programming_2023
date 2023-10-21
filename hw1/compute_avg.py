@@ -1,7 +1,7 @@
 # Read data from the text file
-with open('node2_proc24.txt', 'r') as file:
+with open('n3p3c1.txt', 'r') as file:
     lines = file.readlines()
-n = 2
+n = 3
 io_num = 0
 comput_num = 0
 communi_num = 0
@@ -29,7 +29,7 @@ for line in lines:
         elapsed.append(value)
         elapsed_num += value
 
-print('I/O = ', io_num / n)
-print('Computation = ', comput_num / n)
-print('Communication = ', communi_num / n)
-print('Elapsed = ', elapsed_num / n)
+print(io_num / n)
+print(comput_num / n)
+print(communi_num / n)
+print(elapsed_num / n)
