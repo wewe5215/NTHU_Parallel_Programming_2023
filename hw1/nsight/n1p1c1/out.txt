@@ -1,0 +1,9 @@
+Name	Start	Duration	TID	Category
+MPI_Init	0.088668s	451.269 ms	245648	
+MPI_File_open	0.540351s	2.475 ms	245648	
+MPI_File_read_at	0.542862s	2.804 s	245648	
+MPI_File_close	3.34667s	423.720 μs	245648	
+MPI_File_open	32.4601s	56.301 ms	245648	
+MPI_File_write_at	32.5165s	5.579 μs	245648	
+MPI_File_close	32.5165s	1.975 μs	245648	
+MPI_Finalize	32.5165s	7.075 ms	245648	

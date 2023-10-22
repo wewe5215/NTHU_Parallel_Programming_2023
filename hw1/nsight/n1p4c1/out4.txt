@@ -1,0 +1,14 @@
+Name	Start	Duration	TID	Category
+MPI_Init	0.0969492s	616.238 ms	248175	
+MPI_File_open	0.713483s	3.748 ms	248175	
+MPI_File_read_at	0.717288s	413.526 ms	248175	
+MPI_File_close	1.13088s	5.433 ms	248175	
+MPI_Sendrecv	9.14097s	209.284 μs	248175	
+MPI_Sendrecv	9.14118s	395.522 ms	248175	
+MPI_Sendrecv	10.5943s	904.738 ms	248175	
+MPI_Sendrecv	11.4991s	374.646 ms	248175	
+MPI_Sendrecv	12.4255s	917.648 ms	248175	
+MPI_File_open	13.4382s	8.038 ms	248175	
+MPI_File_write_at	13.4462s	3.341 μs	248175	
+MPI_File_close	13.4462s	1.794 μs	248175	
+MPI_Finalize	13.4462s	7.831 ms	248175	
