@@ -1,0 +1,140 @@
+#proc getdata:
+data:
+MPI_Sendrecv 167772160 104 17.77565 6.6114e-02 3.6813e-01 17.77565 104 58.4506504324812 40.3100775193798
+MPI_Sendrecv 4 154 12.635731 0.0000e+00 6.2024e-01 12.635731 154 41.5493495675188 59.6899224806202
+MPI_File_read_at 178956628 8 1.42476 1.7221e-01 1.8456e-01 1.42476 8 66.7804077806421 66.6666666666667
+MPI_File_read_at 178956632 4 0.70874 1.7043e-01 1.8401e-01 0.70874 4 33.2195922193579 33.3333333333333
+MPI_File_write_at 178956628 8 4.41075e-05 3.8147e-06 8.1062e-06 4.41075e-05 8 64.4600525238177 66.6666666666667
+MPI_File_write_at 178956632 4 2.43186e-05 8.1062e-06 8.1062e-06 2.43186e-05 4 35.5399474761823 33.3333333333333
+ 
+ 
+#proc areadef
+rectangle: 1 1 6 4
+xautorange: 4 178956632
+yrange: 0 100
+yaxis.stubs: inc
+xscaletype: log
+// yscaletype: log
+yaxis.label: % calls <= buffer size
+ 
+#proc xaxis
+  label: Buffer size (bytes)
+  selflocatingstubs: text
+        1          1
+        4          4
+        16         16
+        64         64
+        256        256
+        1024       1KB
+        4096       4KB
+        16384      16KB
+        65536      64KB
+        262144     256KB
+        1048576    1MB
+        4194304    4MB
+        16777216   16MB
+        67108864   64MB
+        268435456  128MB
+        1073741824 512MB
+  
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_Sendrecv
+linedetails: color=red
+legendlabel: MPI_Sendrecv
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=red
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_File_read_at
+linedetails: color=green
+legendlabel: MPI_File_read_at
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=green
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_File_open
+linedetails: color=blue
+legendlabel: MPI_File_open
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=blue
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_File_close
+linedetails: color=yellow
+legendlabel: MPI_File_close
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=yellow
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_File_write_at
+linedetails: color=purple
+legendlabel: MPI_File_write_at
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=purple
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_Comm_rank
+linedetails: color=coral
+legendlabel: MPI_Comm_rank
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=coral
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_Comm_size
+linedetails: color=orange
+legendlabel: MPI_Comm_size
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=orange
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_Init
+linedetails: color=darkblue
+legendlabel: MPI_Init
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=darkblue
+ 
+ 
+#proc lineplot
+xfield: 2
+yfield: 10
+sort: yes
+accum: yes
+select: @@1 = MPI_Finalize
+linedetails: color=limegreen
+legendlabel: MPI_Finalize
+pointsymbol: shape=circle linecolor=black radius=0.03 fillcolor=limegreen
+ 
+#proc legend
+location: max-0.5 max-0.5
