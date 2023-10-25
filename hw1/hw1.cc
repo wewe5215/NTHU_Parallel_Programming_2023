@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <algorithm>
 #include <boost/sort/spreadsort/float_sort.hpp>
+#include <cstring>
 #define _0(x)	(x & 0xFF)
 #define _1(x)	((x >> 8) & 0xFF)
 #define _2(x)	((x >> 16) & 0xFF)
@@ -80,7 +81,6 @@ int main(int argc, char **argv)
     MPI_File_open(new_comm, input_filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &input_file);
     MPI_File_read_at(input_file, sizeof(float) * start_offset, data, data_to_solve, MPI_FLOAT, MPI_STATUS_IGNORE);
     MPI_File_close(&input_file);
-    // radix_sort(data, data_to_solve);
     unsigned int* array = (unsigned int*)malloc(data_to_solve * sizeof(unsigned int));
 	unsigned int* sort = (unsigned int*)malloc(data_to_solve * sizeof(unsigned int));
 	const unsigned int kHist = 256;
