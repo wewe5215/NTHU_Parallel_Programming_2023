@@ -13,11 +13,23 @@
 const char* filename;
 int iters, width, height, ncpus;
 double left, right, lower, upper;
+double XCoeff, YCoeff;
 cpu_set_t cpu_set;
 size_t row_size;
 png_bytep row;
 png_bytep* rows;
 int* image;
+static inline void write_color(int p, png_bytep color){
+    if (p != iters) {
+        if (p & 16) {
+            color[0] = 240;
+            color[1] = color[2] = p % 16 * 16;
+        } else {
+            color[0] = p % 16 * 16;
+        }
+    }
+    return;
+}
 void write_png(const char* filename, int iters, int width, int height, const int* buffer) {
     FILE* fp = fopen(filename, "wb");
     assert(fp);
@@ -40,7 +52,7 @@ void write_png(const char* filename, int iters, int width, int height, const int
     fclose(fp);
 }
 
-void* mandelbrot(void* threadid){
+void mandelbrot(){
     /* allocate memory for image */
     image = (int*)malloc(width * height * sizeof(int));
     rows = (png_bytep*)malloc(height * sizeof(png_bytep));
@@ -59,33 +71,22 @@ void* mandelbrot(void* threadid){
             double x0 = i * XCoeff + left;
 
             int repeats = 0;
-            double x = 0;
-            double y = 0;
+            double x = 0, y = 0;
+            double x_sq = 0, y_sq = 0;
             double length_squared = 0;
             while (repeats < iters && length_squared < 4) {
-                double x_sq = x * x, y_sq = y * y;
                 double temp = x_sq - y_sq + x0;
                 y = 2 * x * y + y0;
                 x = temp;
+                x_sq = x * x;
+                y_sq = y * y;
                 length_squared = x_sq + y_sq;
                 ++repeats;
             }
-            image[j * width + i] = repeats;
-            int p = image[j * width + i];
-            png_bytep color = rows[(height - 1 - j)] + i * 3;
-            if (p != iters) {
-                if (p & 16) {
-                    color[0] = 240;
-                    color[1] = color[2] = p % 16 * 16;
-                } else {
-                    color[0] = p % 16 * 16;
-                }
-            }
+            write_color(repeats, rows[(height - 1 - j)] + i * 3);
         }
     }
-    /* draw and cleanup */
-    write_png(filename, iters, width, height, image);
-    free(image);
+    return;
 }
 int main(int argc, char** argv) {
     /* detect how many CPUs are available */
@@ -102,6 +103,31 @@ int main(int argc, char** argv) {
     upper = strtod(argv[6], 0);
     width = strtol(argv[7], 0, 10);
     height = strtol(argv[8], 0, 10);
+    /* allocate memory for image */
+    image = (int*)malloc(width * height * sizeof(int));
+    rows = (png_bytep*)malloc(height * sizeof(png_bytep));
+    row_size = 3 * width * sizeof(png_byte);
+    assert(image);
+    XCoeff = ((right - left) / width);
+    YCoeff = ((upper - lower) / height);
+    pthread_t threads[ncpus];
+    int rc;
+    int ID[ncpus];
+    int t;
+    // for (t = 0; t < ncpus; t++) {
+    //     ID[t] = t;
+    //     rc = pthread_create(&threads[t], NULL, mandelbrot, (void*)&ID[t]);
+    //     if (rc) {
+    //         printf("ERROR; return code from pthread_create() is %d\n", rc);
+    //         exit(-1);
+    //     }
+    // }
+	// for(t = 0; t < ncpus; t++)
+	// 	pthread_join(threads[t], NULL);
+    /* draw and cleanup */
+    mandelbrot();
+    write_png(filename, iters, width, height, image);
+    free(image);
 
 }
 
