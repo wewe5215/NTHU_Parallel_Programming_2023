@@ -10,6 +10,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <math.h>
+#include <emmintrin.h>
 const char* filename;
 int iters, width, height, ncpus;
 double left, right, lower, upper;
@@ -64,11 +65,55 @@ void mandelbrot(){
     XCoeff = ((right - left) / width);
     YCoeff = ((upper - lower) / height);
     for (int j = 0; j < height; ++j) {
-        double y0 = j * YCoeff + lower;
+        __m128d x, y, x_sq, y_sq, x0, y0, num_1, num_2, length_squared, repeats;
+        num_1 = _mm_set_pd((double)1.0, (double)1.0);
+        num_2 = _mm_set_pd((double)2.0, (double)2.0);
         rows[(height - 1 - j)] = (png_bytep)malloc(row_size);
         memset(rows[(height - 1 - j)], 0, row_size);
-        for (int i = 0; i < width; ++i) {
-            double x0 = i * XCoeff + left;
+        for (int i = 0; i < width; i += 2) {
+            x0[0] = i * XCoeff + left;
+            x0[1] = (i+1) * XCoeff + left;
+            y0 = _mm_set_pd((double)j * YCoeff + lower, (double)j * YCoeff + lower);
+            x = _mm_set_pd((double)0.0, (double)0.0);
+            y = x_sq = y_sq = length_squared = repeats = x;
+            while(true){
+                if (repeats[0] < iters && length_squared[0] < 4 \
+                    && repeats[1] < iters && length_squared[1] < 4) {
+                    y = _mm_add_pd(_mm_mul_pd(_mm_mul_pd(num_2, x), y), y0);
+                    x = _mm_add_pd(_mm_sub_pd(x_sq, y_sq), x0);
+                    x_sq = _mm_mul_pd(x, x);
+                    y_sq =_mm_mul_pd(y, y);
+                    length_squared = _mm_add_pd(x_sq, y_sq);
+                    repeats = _mm_add_pd(num_1, repeats);
+                }
+                else if(!(repeats[0] < iters && length_squared[0] < 4) \
+                    && repeats[1] < iters && length_squared[1] < 4){
+                    y[1] = 2 * x[1] * y[1] + y0[1];
+                    x[1] = x_sq[1] - y_sq[1] + x0[1];
+                    x_sq[1] = x[1] * x[1];
+                    y_sq[1] = y[1] * y[1];
+                    length_squared[1] = x_sq[1] + y_sq[1];
+                    ++repeats[1];
+                }
+                else if((repeats[0] < iters && length_squared[0] < 4) \
+                    && !(repeats[1] < iters && length_squared[1] < 4)){
+                    double temp_0 = x_sq[0] - y_sq[0] + x0[0];
+                    y[0] = 2 * x[0] * y[0] + y0[0];
+                    x[0] = temp_0;
+                    x_sq[0] = x[0] * x[0];
+                    y_sq[0] = y[0] * y[0];
+                    length_squared[0] = x_sq[0] + y_sq[0];
+                    ++repeats[0];
+                }
+                else{
+                    write_color(repeats[0], rows[(height - 1 - j)] + i * 3);
+                    write_color(repeats[1], rows[(height - 1 - j)] + (i+1) * 3);
+                    break;
+                }
+            }
+        }
+        if(width % 2){
+            double x0 = (width-1) * XCoeff + left;
 
             int repeats = 0;
             double x = 0, y = 0;
@@ -76,14 +121,14 @@ void mandelbrot(){
             double length_squared = 0;
             while (repeats < iters && length_squared < 4) {
                 double temp = x_sq - y_sq + x0;
-                y = 2 * x * y + y0;
+                y = 2 * x * y + y0[0];
                 x = temp;
                 x_sq = x * x;
                 y_sq = y * y;
                 length_squared = x_sq + y_sq;
                 ++repeats;
             }
-            write_color(repeats, rows[(height - 1 - j)] + i * 3);
+            write_color(repeats, rows[(height - 1 - j)] + (width-1) * 3);
         }
     }
     return;
@@ -130,4 +175,3 @@ int main(int argc, char** argv) {
     free(image);
 
 }
-
