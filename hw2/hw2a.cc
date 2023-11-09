@@ -19,7 +19,8 @@ cpu_set_t cpu_set;
 size_t row_size;
 png_bytep row;
 png_bytep* rows;
-int* image;
+pthread_mutex_t mutex;
+int global_j = 0;
 static inline void write_color(int p, png_bytep color){
     if (p != iters) {
         if (p & 16) {
@@ -31,7 +32,7 @@ static inline void write_color(int p, png_bytep color){
     }
     return;
 }
-void write_png(const char* filename, int iters, int width, int height, const int* buffer) {
+void write_png(const char* filename, int iters, int width, int height) {
     FILE* fp = fopen(filename, "wb");
     assert(fp);
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -53,18 +54,23 @@ void write_png(const char* filename, int iters, int width, int height, const int
     fclose(fp);
 }
 
-void mandelbrot(){
-    /* allocate memory for image */
-    image = (int*)malloc(width * height * sizeof(int));
-    rows = (png_bytep*)malloc(height * sizeof(png_bytep));
-    row_size = 3 * width * sizeof(png_byte);
-    assert(image);
-
+void* mandelbrot(void* threadid){
+    int j = 0;
     /* mandelbrot set */
     double XCoeff, YCoeff;
     XCoeff = ((right - left) / width);
     YCoeff = ((upper - lower) / height);
-    for (int j = 0; j < height; ++j) {
+    while(true) {
+        pthread_mutex_lock(&mutex);
+        if(global_j == height){
+            pthread_mutex_unlock(&mutex);
+            break;
+        }
+        else{
+            j = global_j;
+            global_j++;
+        }
+        pthread_mutex_unlock(&mutex);
         __m128d x, y, x_sq, y_sq, x0, y0, num_1, num_2, length_squared, repeats;
         num_1 = _mm_set_pd((double)1.0, (double)1.0);
         num_2 = _mm_set_pd((double)2.0, (double)2.0);
@@ -131,7 +137,7 @@ void mandelbrot(){
             write_color(repeats, rows[(height - 1 - j)] + (width-1) * 3);
         }
     }
-    return;
+    pthread_exit(NULL);
 }
 int main(int argc, char** argv) {
     /* detect how many CPUs are available */
@@ -148,30 +154,29 @@ int main(int argc, char** argv) {
     upper = strtod(argv[6], 0);
     width = strtol(argv[7], 0, 10);
     height = strtol(argv[8], 0, 10);
-    /* allocate memory for image */
-    image = (int*)malloc(width * height * sizeof(int));
     rows = (png_bytep*)malloc(height * sizeof(png_bytep));
     row_size = 3 * width * sizeof(png_byte);
-    assert(image);
     XCoeff = ((right - left) / width);
     YCoeff = ((upper - lower) / height);
     pthread_t threads[ncpus];
     int rc;
     int ID[ncpus];
     int t;
-    // for (t = 0; t < ncpus; t++) {
-    //     ID[t] = t;
-    //     rc = pthread_create(&threads[t], NULL, mandelbrot, (void*)&ID[t]);
-    //     if (rc) {
-    //         printf("ERROR; return code from pthread_create() is %d\n", rc);
-    //         exit(-1);
-    //     }
-    // }
-	// for(t = 0; t < ncpus; t++)
-	// 	pthread_join(threads[t], NULL);
+    global_j = 0;
+    pthread_mutex_init (&mutex, NULL);
+    for (t = 0; t < ncpus; t++) {
+        ID[t] = t;
+        rc = pthread_create(&threads[t], NULL, mandelbrot, (void*)&ID[t]);
+        if (rc) {
+            printf("ERROR; return code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
+    }
+	for(t = 0; t < ncpus; t++)
+		pthread_join(threads[t], NULL);
     /* draw and cleanup */
-    mandelbrot();
-    write_png(filename, iters, width, height, image);
-    free(image);
+    // mandelbrot();
+    pthread_mutex_destroy(&mutex);
+    write_png(filename, iters, width, height);
 
 }
