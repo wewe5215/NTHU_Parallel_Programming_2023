@@ -24,7 +24,7 @@ static inline void write_color(int p, png_bytep color, int iters){
     }
     return;
 }
-void write_png(const char* filename, int iters, int width, int height, png_bytep* rows) {
+void write_png(const char* filename, int iters, int width, int height, png_bytep* rows, int* mapping) {
     FILE* fp = fopen(filename, "wb");
     assert(fp);
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -38,9 +38,10 @@ void write_png(const char* filename, int iters, int width, int height, png_bytep
     png_write_info(png_ptr, info_ptr);
     png_set_compression_level(png_ptr, 1);
     for (int y = 0; y < height; ++y) {
-        png_write_row(png_ptr, rows[y]);
+        png_write_row(png_ptr, rows[mapping[y]]);
         // free(rows[y]);
     }
+    // printf("hello print\n");
     png_write_end(png_ptr, NULL);
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(fp);
@@ -48,7 +49,7 @@ void write_png(const char* filename, int iters, int width, int height, png_bytep
 
 inline void mandelbrot(double left, double right, int width, double upper, double lower, int height, \
                        int rank, int start_offset, int data_to_solve, size_t row_size, \
-                       int iters, png_bytep* rows, int ncpus){
+                       int iters, png_bytep* rows, int ncpus, int size){
 
     /* mandelbrot set */
     double XCoeff, YCoeff;
@@ -57,12 +58,13 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
     #pragma omp parallel num_threads(ncpus)
 	{
 		#pragma omp for schedule(dynamic)
-            for (int j = start_offset; j < start_offset + data_to_solve; ++j) {
+            for (int j = rank; j < height; j += size) {
                 __m128d x, y, x_sq, y_sq, x0, y0, num_1, num_2, length_squared, repeats;
                 num_1 = _mm_set_pd((double)1.0, (double)1.0);
                 num_2 = _mm_set_pd((double)2.0, (double)2.0);
-                int idx = data_to_solve - 1 - (j - start_offset);
-                memset(rows[(data_to_solve - 1 - (j - start_offset))], 0, row_size);
+                int idx = j / size;
+                // printf("idx = %d\n", idx);
+                memset(rows[idx], 0, row_size);
                 for (int i = 0; i < width; i += 2) {
                     x0[0] = i * XCoeff + left;
                     x0[1] = (i+1) * XCoeff + left;
@@ -155,24 +157,6 @@ int main(int argc, char** argv) {
     rc = MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm new_comm = MPI_COMM_WORLD;
-
-    // If size is greater than n, shrink the communicator
-    if (n < size) {
-        int color = (rank < n) ? 0 : MPI_UNDEFINED;
-        MPI_Comm_split(MPI_COMM_WORLD, color, rank, &new_comm);
-        if (color != 0) {
-            MPI_Finalize();
-            return 0; // Exit the processes not needed.
-        }
-
-        // Update rank and size for the new communicator
-        MPI_Comm_rank(new_comm, &rank);
-        MPI_Comm_size(new_comm, &size);
-    } else {
-        new_comm = MPI_COMM_WORLD;
-    }
-    
     
     if(rank < n % size){
         data_to_solve = n / size + 1;
@@ -191,7 +175,7 @@ int main(int argc, char** argv) {
     }
     mandelbrot( left, right, width, upper, lower, height, \
                 rank, start_offset, data_to_solve, row_size, \
-                iters, local_rows_ptr, ncpus);
+                iters, local_rows_ptr, ncpus, size);
     int* recvcounts;
     int* displs;
     // recvcounts, displs, recvtype: (significant only at root)
@@ -203,26 +187,39 @@ int main(int argc, char** argv) {
             if(i < n % size)recvcounts[i] += 1;
             recvcounts[i] = recvcounts[i] * (3 * width);
             if(i == 0){
-                displs[i] = height * (3 * width) - recvcounts[i];
+                displs[i] = 0;
             }
             else{
-                displs[i] = displs[i - 1] - recvcounts[i];
+                displs[i] = displs[i - 1] + recvcounts[i - 1];
             }
         }
     }
     MPI_Gatherv(local_rows, data_to_solve * width * 3, MPI_UNSIGNED_CHAR, \
                 global_rows, recvcounts, displs, \
-                MPI_UNSIGNED_CHAR, 0, new_comm);
-    MPI_Finalize();
+                MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
+    
     
     if(rank == 0){
+        int* mapping = (int*)malloc(height * sizeof(int));
+        int h = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = i; j < height; j += size) {
+				mapping[height - j - 1] = h++;
+			}
+		}
+        // printf("back to sequential\n");
         png_bytep* global_rows_ptr = (png_bytep*)malloc(height * sizeof(png_bytep));
         for(int i = 0; i < height; ++i){
+            // printf("i = %d\n", i);
             global_rows_ptr[i] = &global_rows[3 * width * i];
         }
-        write_png(filename, iters, width, height, global_rows_ptr);
-        free(global_rows);
+        write_png(filename, iters, width, height, global_rows_ptr, mapping);
+        
+        
     }
     
-
+    
+    MPI_Finalize();
+    free(global_rows);
+    free(local_rows);
 }
