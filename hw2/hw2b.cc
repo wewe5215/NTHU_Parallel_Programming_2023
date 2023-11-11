@@ -24,7 +24,7 @@ static inline void write_color(int p, png_bytep color, int iters){
     }
     return;
 }
-void write_png(const char* filename, int iters, int width, int height, png_bytep* rows, int* mapping) {
+inline void write_png(const char* filename, int iters, int width, int height, png_bytep* rows, int* mapping) {
     FILE* fp = fopen(filename, "wb");
     assert(fp);
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -98,12 +98,8 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                             ++repeats[0];
                         }
                         else{
-                            // printf("rank = %d before repeats0\n", rank);
                             write_color(repeats[0], rows[idx] + i * 3, iters);
-                            // printf("rank = %d before repeats1, idx = %d, i = %d\n", \
-                            rank, idx, data_to_solve);
                             write_color(repeats[1], rows[idx] + (i+1) * 3, iters);
-                            // printf("rank = %d after repeats1\n", rank);
                             break;
                         }
                     }
@@ -203,26 +199,19 @@ int main(int argc, char** argv) {
     
     if(rank == 0){
         int* mapping = (int*)malloc(height * sizeof(int));
-        int h = 0;
+        int j, k = 0;
 		for (int i = 0; i < size; i++) {
-			for (int j = i; j < height; j += size) {
-				mapping[height - j - 1] = h++;
+			for (j = i; j < height; j += size) {
+				mapping[height - j - 1] = k++;
 			}
 		}
-        // printf("back to sequential\n");
         png_bytep* global_rows_ptr = (png_bytep*)malloc(height * sizeof(png_bytep));
         for(int i = 0; i < height; ++i){
-            // printf("i = %d\n", i);
             global_rows_ptr[i] = &global_rows[3 * width * i];
         }
         write_png(filename, iters, width, height, global_rows_ptr, mapping);
-        
-        
     }
     free(global_rows);
     free(local_rows);
     MPI_Finalize();
-    
-    
-    
 }
