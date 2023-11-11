@@ -77,6 +77,7 @@ void* mandelbrot(void* threadid){
         rows[(height - 1 - j)] = (png_bytep)malloc(row_size);
         memset(rows[(height - 1 - j)], 0, row_size);
         for (int i = 0; i < width; i += 2) {
+            if(i + 1 >= width)break;
             x0[0] = i * XCoeff + left;
             x0[1] = (i+1) * XCoeff + left;
             y0 = _mm_set_pd((double)j * YCoeff + lower, (double)j * YCoeff + lower);
@@ -92,8 +93,7 @@ void* mandelbrot(void* threadid){
                     length_squared = _mm_add_pd(x_sq, y_sq);
                     repeats = _mm_add_pd(num_1, repeats);
                 }
-                else if(!(repeats[0] < iters && length_squared[0] < 4) \
-                    && repeats[1] < iters && length_squared[1] < 4){
+                else if(repeats[1] < iters && length_squared[1] < 4){
                     y[1] = 2 * x[1] * y[1] + y0[1];
                     x[1] = x_sq[1] - y_sq[1] + x0[1];
                     x_sq[1] = x[1] * x[1];
@@ -101,8 +101,7 @@ void* mandelbrot(void* threadid){
                     length_squared[1] = x_sq[1] + y_sq[1];
                     ++repeats[1];
                 }
-                else if((repeats[0] < iters && length_squared[0] < 4) \
-                    && !(repeats[1] < iters && length_squared[1] < 4)){
+                else if((repeats[0] < iters && length_squared[0] < 4)){
                     double temp_0 = x_sq[0] - y_sq[0] + x0[0];
                     y[0] = 2 * x[0] * y[0] + y0[0];
                     x[0] = temp_0;
