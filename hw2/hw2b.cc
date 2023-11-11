@@ -89,9 +89,8 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                             ++repeats[1];
                         }
                         else if((repeats[0] < iters && length_squared[0] < 4)){
-                            double temp_0 = x_sq[0] - y_sq[0] + x0[0];
                             y[0] = 2 * x[0] * y[0] + y0[0];
-                            x[0] = temp_0;
+                            x[0] = x_sq[0] - y_sq[0] + x0[0];
                             x_sq[0] = x[0] * x[0];
                             y_sq[0] = y[0] * y[0];
                             length_squared[0] = x_sq[0] + y_sq[0];
@@ -112,9 +111,8 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                     double x_sq = 0, y_sq = 0;
                     double length_squared = 0;
                     while (repeats < iters && length_squared < 4) {
-                        double temp = x_sq - y_sq + x0;
                         y = 2 * x * y + y0[0];
-                        x = temp;
+                        x = x_sq - y_sq + x0;
                         x_sq = x * x;
                         y_sq = y * y;
                         length_squared = x_sq + y_sq;
