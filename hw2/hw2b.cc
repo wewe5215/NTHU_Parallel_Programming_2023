@@ -41,7 +41,6 @@ void write_png(const char* filename, int iters, int width, int height, png_bytep
         png_write_row(png_ptr, rows[mapping[y]]);
         // free(rows[y]);
     }
-    // printf("hello print\n");
     png_write_end(png_ptr, NULL);
     png_destroy_write_struct(&png_ptr, &info_ptr);
     fclose(fp);
@@ -63,9 +62,9 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                 num_1 = _mm_set_pd((double)1.0, (double)1.0);
                 num_2 = _mm_set_pd((double)2.0, (double)2.0);
                 int idx = j / size;
-                // printf("idx = %d\n", idx);
                 memset(rows[idx], 0, row_size);
                 for (int i = 0; i < width; i += 2) {
+                    if(i + 1 >= width)break;
                     x0[0] = i * XCoeff + left;
                     x0[1] = (i+1) * XCoeff + left;
                     y0 = _mm_set_pd((double)j * YCoeff + lower, (double)j * YCoeff + lower);
@@ -81,8 +80,7 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                             length_squared = _mm_add_pd(x_sq, y_sq);
                             repeats = _mm_add_pd(num_1, repeats);
                         }
-                        else if(!(repeats[0] < iters && length_squared[0] < 4) \
-                            && repeats[1] < iters && length_squared[1] < 4){
+                        else if(repeats[1] < iters && length_squared[1] < 4){
                             y[1] = 2 * x[1] * y[1] + y0[1];
                             x[1] = x_sq[1] - y_sq[1] + x0[1];
                             x_sq[1] = x[1] * x[1];
@@ -90,8 +88,7 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                             length_squared[1] = x_sq[1] + y_sq[1];
                             ++repeats[1];
                         }
-                        else if((repeats[0] < iters && length_squared[0] < 4) \
-                            && !(repeats[1] < iters && length_squared[1] < 4)){
+                        else if((repeats[0] < iters && length_squared[0] < 4)){
                             double temp_0 = x_sq[0] - y_sq[0] + x0[0];
                             y[0] = 2 * x[0] * y[0] + y0[0];
                             x[0] = temp_0;
@@ -101,8 +98,12 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                             ++repeats[0];
                         }
                         else{
+                            // printf("rank = %d before repeats0\n", rank);
                             write_color(repeats[0], rows[idx] + i * 3, iters);
+                            // printf("rank = %d before repeats1, idx = %d, i = %d\n", \
+                            rank, idx, data_to_solve);
                             write_color(repeats[1], rows[idx] + (i+1) * 3, iters);
+                            // printf("rank = %d after repeats1\n", rank);
                             break;
                         }
                     }
@@ -123,7 +124,9 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                         length_squared = x_sq + y_sq;
                         ++repeats;
                     }
+                    // printf("rank = %d\n", rank);
                     write_color(repeats, rows[idx] + (width-1) * 3, iters);
+                    // printf("rank = %d\n", rank);
                 }
             }
     }
@@ -158,19 +161,19 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     
-    if(rank < n % size){
-        data_to_solve = n / size + 1;
+    if(rank < height % size){
+        data_to_solve = height / size + 1;
         if(rank == 0)start_offset = 0;
-        else start_offset = rank * ( n / size ) + rank;
+        else start_offset = rank * ( height / size ) + rank;
     }
     else{
-        data_to_solve = n / size;
-        start_offset = rank * ( n / size ) + ( n % size );
+        data_to_solve = height / size;
+        start_offset = rank * ( height / size ) + ( height % size );
     }
     png_bytep local_rows = (png_bytep)malloc(data_to_solve * row_size);
     png_bytep global_rows = (png_bytep)malloc(height * row_size);
     png_bytep* local_rows_ptr = (png_bytep*)malloc(data_to_solve * sizeof(png_bytep));
-    for(int i = 0; i < data_to_solve; i ++){
+    for(int i = 0; i < data_to_solve; ++i){
         local_rows_ptr[i] = &local_rows[3 * width * i];
     }
     mandelbrot( left, right, width, upper, lower, height, \
@@ -198,7 +201,6 @@ int main(int argc, char** argv) {
                 global_rows, recvcounts, displs, \
                 MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
     
-    
     if(rank == 0){
         int* mapping = (int*)malloc(height * sizeof(int));
         int h = 0;
@@ -217,9 +219,10 @@ int main(int argc, char** argv) {
         
         
     }
-    
-    
-    MPI_Finalize();
     free(global_rows);
     free(local_rows);
+    MPI_Finalize();
+    
+    
+    
 }
