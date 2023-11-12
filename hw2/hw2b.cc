@@ -118,9 +118,7 @@ inline void mandelbrot(double left, double right, int width, double upper, doubl
                         length_squared = x_sq + y_sq;
                         ++repeats;
                     }
-                    // printf("rank = %d\n", rank);
                     write_color(repeats, rows[idx] + (width-1) * 3, iters);
-                    // printf("rank = %d\n", rank);
                 }
             }
     }
