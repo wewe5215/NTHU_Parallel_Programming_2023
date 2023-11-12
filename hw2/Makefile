@@ -5,8 +5,7 @@ CFLAGS = -lm -O3
 hw2a: CFLAGS += -pthread -ffast-math
 hw2b: CC = mpicc
 hw2b: CXX = mpicxx
-hw2b: CFLAGS += -fopenmp -fno-math-errno -ffinite-math-only -freciprocal-math \
--fno-signed-zeros -fno-trapping-math -fno-rounding-math -ffp-contract=fast
+hw2b: CFLAGS += -fopenmp -fno-math-errno -ffinite-math-only -freciprocal-math -fno-signed-zeros -fno-trapping-math -fno-rounding-math -ffp-contract=fast
 CXXFLAGS = $(CFLAGS)
 TARGETS = hw2seq hw2a hw2b
 

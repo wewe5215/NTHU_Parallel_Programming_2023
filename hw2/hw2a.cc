@@ -32,7 +32,7 @@ static inline void write_color(int p, png_bytep color){
     }
     return;
 }
-void write_png(const char* filename, int iters, int width, int height) {
+inline void write_png(const char* filename, int iters, int width, int height) {
     FILE* fp = fopen(filename, "wb");
     assert(fp);
     png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
