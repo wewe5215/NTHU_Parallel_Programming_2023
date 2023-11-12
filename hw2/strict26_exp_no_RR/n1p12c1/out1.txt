@@ -1,0 +1,4 @@
+Name	Start	Duration	TID	Category
+MPI_Init	0.1353s	643.885 ms	847546	
+MPI_Gatherv	28.5803s	5.830 ms	847546	
+MPI_Finalize	28.5861s	10.601 ms	847546	

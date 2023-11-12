@@ -1,0 +1,4 @@
+Communication time =  0.065248
+Elapsed time =  72.9033728
+Communication time =  9.822
+Elapsed time =  72.89466800000001
