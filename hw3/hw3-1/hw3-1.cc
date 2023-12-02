@@ -26,7 +26,6 @@ void handle_input(char* input_file){
     for(i = 0; i < V; i ++){
         d_tmp[i] = d + i * V;
         for(int j = 0; j < V; j ++){
-            int idx = i * V + j;
             if(i == j)d_tmp[i][j] = 0;
             else d_tmp[i][j] = MAXIMUM;
         }
@@ -46,20 +45,9 @@ void handle_input(char* input_file){
 
 void* Floyd_Warshall(void* threadid){
     int tid = *(int*) threadid;
-    int ave = V / ncpus, rem = V % ncpus;
-    int data_to_solve, start_offset = tid * ave;
-    if(tid < rem){
-        data_to_solve = ave + 1;
-        start_offset += tid;
-    }
-    else{
-        data_to_solve = ave;
-        start_offset += rem;
-    }
-
     int i, j, k;
     for(k = 0; k < V; k ++){
-        for(i = start_offset; i < start_offset + data_to_solve; i ++){
+        for(i = tid; i < V; i += ncpus){
             for(j = 0; j < V; j ++){
                 d_tmp[i][j] = std::min(d_tmp[i][j], d_tmp[i][k] + d_tmp[k][j]);
             }
