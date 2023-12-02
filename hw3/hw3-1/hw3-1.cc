@@ -7,7 +7,9 @@
 cpu_set_t cpu_set;
 int ncpus;
 int* d;
+int** d_tmp;
 int V, E;
+int V_sq;
 pthread_barrier_t barrier;
 // If there is no valid path between i->j, dist(i, j) = 2 ^ 30 − 1 = 1073741823.
 const int MAXIMUM = ((1 << 30) - 1);
@@ -17,12 +19,16 @@ void handle_input(char* input_file){
     // Read the number of vertices and edges
     fread(&V, sizeof(int), 1, file);
     fread(&E, sizeof(int), 1, file);
-    d = (int*)malloc((V * V + 5) * sizeof(int));
+    V_sq = V * V;
+    d = (int*)malloc((V_sq + 5) * sizeof(int));
+    d_tmp = (int**)malloc(V * sizeof(int*));
     int i;
     for(i = 0; i < V; i ++){
+        d_tmp[i] = d + i * V;
         for(int j = 0; j < V; j ++){
-            if(i == j)d[i * V + j] = 0;
-            else d[i * V + j] = MAXIMUM;
+            int idx = i * V + j;
+            if(i == j)d_tmp[i][j] = 0;
+            else d_tmp[i][j] = MAXIMUM;
         }
     }
 
@@ -31,7 +37,7 @@ void handle_input(char* input_file){
         fread(&src, sizeof(int), 1, file);
         fread(&dst, sizeof(int), 1, file);
         fread(&dist, sizeof(int), 1, file);
-        d[src * V + dst] = dist;
+        d_tmp[src][dst] = dist;
     }
 
     fclose(file);
@@ -40,22 +46,22 @@ void handle_input(char* input_file){
 
 void* Floyd_Warshall(void* threadid){
     int tid = *(int*) threadid;
-    int data_to_solve, start_offset;
-    if(tid < V % ncpus){
-        data_to_solve = V / ncpus + 1;
-        if(tid == 0)start_offset = 0;
-        else start_offset = tid * ( V / ncpus ) + tid;
+    int ave = V / ncpus, rem = V % ncpus;
+    int data_to_solve, start_offset = tid * ave;
+    if(tid < rem){
+        data_to_solve = ave + 1;
+        start_offset += tid;
     }
     else{
-        data_to_solve = V / ncpus;
-        start_offset = tid * ( V / ncpus ) + ( V % ncpus );
+        data_to_solve = ave;
+        start_offset += rem;
     }
 
     int i, j, k;
     for(k = 0; k < V; k ++){
         for(i = start_offset; i < start_offset + data_to_solve; i ++){
             for(j = 0; j < V; j ++){
-                d[i * V + j] = std::min(d[i * V + j], d[i * V + k] + d[k * V + j]);
+                d_tmp[i][j] = std::min(d_tmp[i][j], d_tmp[i][k] + d_tmp[k][j]);
             }
         }
         pthread_barrier_wait(&barrier);
@@ -65,7 +71,7 @@ void* Floyd_Warshall(void* threadid){
 
 void handle_output(char* output_file){
     FILE *file = fopen(output_file, "w");
-    fwrite(d, sizeof(int), V * V, file);
+    fwrite(d, sizeof(int), V_sq, file);
     fclose(file);
     return;
 }
