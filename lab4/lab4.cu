@@ -213,16 +213,16 @@ int main(int argc, char **argv) {
         std::cerr << "Error in read png" << std::endl;
         return -1;
     }
-
-    dst = (unsigned char *)malloc(height * width * channels * sizeof(unsigned char));
-    cudaHostRegister(src, height * width * channels * sizeof(unsigned char), cudaHostRegisterDefault);
+    int size = height * width * channels * sizeof(unsigned char);
+    dst = (unsigned char *)malloc(size);
+    cudaHostRegister(src, size, cudaHostRegisterDefault);
 
     // cudaMalloc(...) for device src and device dst
-    cudaMalloc(&dsrc, height * width * channels * sizeof(unsigned char));
-    cudaMalloc(&ddst, height * width * channels * sizeof(unsigned char));
+    cudaMalloc(&dsrc, size);
+    cudaMalloc(&ddst, size);
 
     // cudaMemcpy(...) copy source image to device (mask matrix if necessary)
-    cudaMemcpy(dsrc, src, height * width * channels * sizeof(unsigned char), cudaMemcpyHostToDevice);
+    cudaMemcpy(dsrc, src, size, cudaMemcpyHostToDevice);
 
     // decide to use how many blocks and threads
     const int num_threads = 256;
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
     sobel << <num_blocks, num_threads>>> (dsrc, ddst, height, width, channels);
 
     // cudaMemcpy(...) copy result image to host
-    cudaMemcpy(dst, ddst, height * width * channels * sizeof(unsigned char), cudaMemcpyDeviceToHost);
+    cudaMemcpy(dst, ddst, size, cudaMemcpyDeviceToHost);
 
     write_png(argv[2], dst, height, width, channels);
     free(src);
