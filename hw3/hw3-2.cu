@@ -197,7 +197,6 @@ __global__ void Phase3(int* d, int round, int V){
     d[idx_d + V * 32] = pivot[j + 32][i];
     d[idx_d + 32] = pivot[j][i + 32];
     d[idx_d + V * 32 + 32] = pivot[j + 32][i + 32];
-    
 }
 
 
@@ -207,7 +206,6 @@ void handle_output(char* output_file){
     for(int i = 0; i < original_V; i ++){
         fwrite(d + i * V, sizeof(int), original_V, file);
     }
-    
     fclose(file);
     return;
 }
