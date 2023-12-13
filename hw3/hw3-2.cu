@@ -216,7 +216,7 @@ int main(int argc, char** argv) {
     handle_input(argv[1]);
 
     // for GPU code
-    int d_size = V_sq * sizeof(int);
+    size_t d_size = V_sq * sizeof(int);// use size_t instead of int !!!
     cudaHostRegister(d, d_size, cudaHostRegisterDefault);
     int* device_d;
     cudaMalloc(&device_d, d_size);
