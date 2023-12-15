@@ -14,7 +14,6 @@ using namespace std;
 // arr is square --> 4096 = 64 * 64 --> blocksize = 64
 // (64 * 64) / 1024(number of threads per block) = 4 per thread
 // each thread is responsible for 4 data
-// In order to share the task evenly, choose to use the same method in HW2
 int* d;
 int V, E;
 int V_sq;
@@ -75,7 +74,7 @@ __global__ void Phase1(int* d, int round, int V){
     //     idx_y+32, idx_x, shared[j + 32][i], idx_y, idx_x+32, shared[j][i + 32], idx_y+32, idx_x+32, shared[j + 32][i + 32]);
     __syncthreads();
     // calculation
-    #pragma unroll 32
+    #pragma unroll
     for(int k = 0; k < blocksize; k ++){
         shared[j][i] = min(shared[j][i], shared[j][k] + shared[k][i]);
         shared[j + 32][i] = min(shared[j + 32][i], shared[j + 32][k] + shared[k][i]);
@@ -126,7 +125,7 @@ __global__ void Phase2(int* d, int round, int V){
     col[j][i + 32] = d[idx_col_d + 32];
     col[j + 32][i + 32] = d[idx_col_d + V * 32 + 32];
     __syncthreads();
-    #pragma unroll 32
+    #pragma unroll
     for(int k = 0; k < blocksize; k ++){
         row[j][i] = min(row[j][i], pivot[j][k] + row[k][i]);
         row[j + 32][i] = min(row[j + 32][i], pivot[j + 32][k] + row[k][i]);
@@ -185,7 +184,7 @@ __global__ void Phase3(int* d, int round, int V){
     col[j][i + 32] = d[idx_col_d + 32];
     col[j + 32][i + 32] = d[idx_col_d + V * 32 + 32];
     __syncthreads();
-    #pragma unroll 32
+    #pragma unroll
     for(int k = 0; k < blocksize; k ++){
         pivot[j][i] = min(pivot[j][i], row[j][k] + col[k][i]);
         pivot[j + 32][i] = min(pivot[j + 32][i], row[j + 32][k] + col[k][i]);
