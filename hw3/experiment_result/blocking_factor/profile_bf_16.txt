@@ -1,0 +1,21 @@
+==3448514== NVPROF is profiling process 3448514, command: ./bf_16 /home/pp23/share/hw3-2/cases/c21.1 bf_16_c21.1.out
+==3448514== Profiling application: ./bf_16 /home/pp23/share/hw3-2/cases/c21.1 bf_16_c21.1.out
+==3448514== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   91.05%  413.10ms       313  1.3198ms  1.2575ms  1.3755ms  Phase3(int*, int, int)
+                    3.47%  15.743ms         1  15.743ms  15.743ms  15.743ms  [CUDA memcpy DtoH]
+                    3.46%  15.718ms         1  15.718ms  15.718ms  15.718ms  [CUDA memcpy HtoD]
+                    1.68%  7.6139ms       313  24.325us  22.496us  27.936us  Phase2(int*, int, int)
+                    0.34%  1.5519ms       313  4.9580us  4.7040us  5.7920us  Phase1(int*, int, int)
+      API calls:   82.24%  451.88ms         2  225.94ms  15.805ms  436.07ms  cudaMemcpy
+                   17.30%  95.055ms         1  95.055ms  95.055ms  95.055ms  cudaHostRegister
+                    0.42%  2.3039ms       939  2.4530us  1.8890us  168.39us  cudaLaunchKernel
+                    0.02%  135.76us       101  1.3440us     120ns  57.726us  cuDeviceGetAttribute
+                    0.02%  89.876us         1  89.876us  89.876us  89.876us  cudaMalloc
+                    0.00%  10.871us         1  10.871us  10.871us  10.871us  cuDeviceGetPCIBusId
+                    0.00%  10.844us         1  10.844us  10.844us  10.844us  cuDeviceGetName
+                    0.00%  1.2990us         3     433ns     173ns     928ns  cuDeviceGetCount
+                    0.00%     717ns         2     358ns     177ns     540ns  cuDeviceGet
+                    0.00%     278ns         1     278ns     278ns     278ns  cuDeviceTotalMem
+                    0.00%     269ns         1     269ns     269ns     269ns  cuModuleGetLoadingMode
+                    0.00%     214ns         1     214ns     214ns     214ns  cuDeviceGetUuid
