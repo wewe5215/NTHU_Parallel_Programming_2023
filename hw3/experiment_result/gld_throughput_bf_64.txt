@@ -1,0 +1,12 @@
+==38398== NVPROF is profiling process 38398, command: ./bf_64 /home/pp23/share/hw3-2/cases/c21.1 bf_64_c21.1.out
+==38398== Profiling application: ./bf_64 /home/pp23/share/hw3-2/cases/c21.1 bf_64_c21.1.out
+==38398== Profiling result:
+==38398== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+         79                            gld_throughput                    Global Load Throughput  371.87MB/s  390.63MB/s  383.38MB/s
+    Kernel: Phase2(int*, int, int)
+         79                            gld_throughput                    Global Load Throughput  11.369GB/s  11.819GB/s  11.563GB/s
+    Kernel: Phase3(int*, int, int)
+         79                            gld_throughput                    Global Load Throughput  18.903GB/s  18.943GB/s  18.923GB/s

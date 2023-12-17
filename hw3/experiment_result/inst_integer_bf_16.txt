@@ -1,0 +1,12 @@
+==64634== NVPROF is profiling process 64634, command: ./bf_16 /home/pp23/share/hw3-2/cases/c21.1 bf_16_c21.1.out
+==64634== Profiling application: ./bf_16 /home/pp23/share/hw3-2/cases/c21.1 bf_16_c21.1.out
+==64634== Profiling result:
+==64634== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+        313                              inst_integer                      Integer Instructions        9152        9152        9152
+    Kernel: Phase2(int*, int, int)
+        313                              inst_integer                      Integer Instructions     5790784     5790784     5790784
+    Kernel: Phase3(int*, int, int)
+        313                              inst_integer                      Integer Instructions   816212096   816212096   816212096

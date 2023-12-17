@@ -1,0 +1,12 @@
+==3292768== NVPROF is profiling process 3292768, command: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==3292768== Profiling application: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==3292768== Profiling result:
+==3292768== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+        375                        achieved_occupancy                        Achieved Occupancy    0.497802    0.498130    0.497949
+    Kernel: Phase2(int*, int, int)
+        375                        achieved_occupancy                        Achieved Occupancy    0.976777    0.992088    0.981218
+    Kernel: Phase3(int*, int, int)
+        375                        achieved_occupancy                        Achieved Occupancy    0.946712    0.947737    0.947188

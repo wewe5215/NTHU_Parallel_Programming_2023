@@ -1,0 +1,3 @@
+vertex num = 25000
+Elapsed time: 23.845617669 seconds
+Memcpy = 13.007180760, I/O = 8.832743316, computing = 2.005693593

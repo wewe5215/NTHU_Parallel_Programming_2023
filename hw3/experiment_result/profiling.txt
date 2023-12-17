@@ -1,0 +1,22 @@
+srun -p prof -N1 -n1 --gres=gpu:1 nvprof ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==20898== NVPROF is profiling process 20898, command: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==20898== Profiling application: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==20898== Profiling result:
+            Type  Time(%)      Time     Calls       Avg       Min       Max  Name
+ GPU activities:   92.51%  12.2459s       375  32.656ms  32.413ms  32.958ms  Phase3(int*, int, int)
+                    2.90%  384.38ms         1  384.38ms  384.38ms  384.38ms  [CUDA memcpy HtoD]
+                    2.65%  351.24ms         1  351.24ms  351.24ms  351.24ms  [CUDA memcpy DtoH]
+                    1.87%  247.13ms       375  659.02us  628.84us  687.02us  Phase2(int*, int, int)
+                    0.07%  8.7874ms       375  23.433us  23.200us  24.608us  Phase1(int*, int, int)
+      API calls:   89.92%  12.1066s         2  6.05332s  384.46ms  11.7222s  cudaMemcpy
+                    8.40%  1.13126s      1125  1.0056ms  2.5890us  32.803ms  cudaLaunchKernel
+                    1.68%  226.23ms         1  226.23ms  226.23ms  226.23ms  cudaHostRegister
+                    0.00%  216.76us         1  216.76us  216.76us  216.76us  cudaMalloc
+                    0.00%  135.34us       101  1.3400us     109ns  55.459us  cuDeviceGetAttribute
+                    0.00%  19.845us         1  19.845us  19.845us  19.845us  cuDeviceGetName
+                    0.00%  6.9330us         1  6.9330us  6.9330us  6.9330us  cuDeviceGetPCIBusId
+                    0.00%  1.9420us         3     647ns     170ns  1.5630us  cuDeviceGetCount
+                    0.00%  1.3500us         2     675ns     137ns  1.2130us  cuDeviceGet
+                    0.00%     984ns         1     984ns     984ns     984ns  cuModuleGetLoadingMode
+                    0.00%     371ns         1     371ns     371ns     371ns  cuDeviceTotalMem
+                    0.00%     368ns         1     368ns     368ns     368ns  cuDeviceGetUuid

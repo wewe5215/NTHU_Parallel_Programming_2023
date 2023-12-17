@@ -1,0 +1,12 @@
+==64944== NVPROF is profiling process 64944, command: ./bf_16 /home/pp23/share/hw3-2/cases/c21.1 bf_16_c21.1.out
+==64944== Profiling application: ./bf_16 /home/pp23/share/hw3-2/cases/c21.1 bf_16_c21.1.out
+==64944== Profiling result:
+==64944== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+        313                    shared_load_throughput             Shared Memory Load Throughput  4.3559GB/s  15.085GB/s  14.457GB/s
+    Kernel: Phase2(int*, int, int)
+        313                    shared_load_throughput             Shared Memory Load Throughput  1475.9GB/s  1712.8GB/s  1564.0GB/s
+    Kernel: Phase3(int*, int, int)
+        313                    shared_load_throughput             Shared Memory Load Throughput  929.00GB/s  1039.8GB/s  980.12GB/s

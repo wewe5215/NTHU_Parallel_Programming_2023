@@ -1,0 +1,2 @@
+Elapsed time: 20.489010058 seconds
+computing = 2.531920363

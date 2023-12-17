@@ -1,0 +1,14 @@
+srun: job 848080 queued and waiting for resources
+srun: job 848080 has been allocated resources
+==32529== NVPROF is profiling process 32529, command: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==32529== Profiling application: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==32529== Profiling result:
+==32529== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+        375                            gld_throughput                    Global Load Throughput  353.05MB/s  382.67MB/s  374.86MB/s
+    Kernel: Phase2(int*, int, int)
+        375                            gld_throughput                    Global Load Throughput  11.864GB/s  12.279GB/s  12.024GB/s
+    Kernel: Phase3(int*, int, int)
+        375                            gld_throughput                    Global Load Throughput  18.534GB/s  18.754GB/s  18.572GB/s

@@ -1,0 +1,12 @@
+==65116== NVPROF is profiling process 65116, command: ./bf_8 /home/pp23/share/hw3-2/cases/c21.1 bf_8_c21.1.out
+==65116== Profiling application: ./bf_8 /home/pp23/share/hw3-2/cases/c21.1 bf_8_c21.1.out
+==65116== Profiling result:
+==65116== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+        625                              inst_integer                      Integer Instructions        1264        1264        1264
+    Kernel: Phase2(int*, int, int)
+        625                              inst_integer                      Integer Instructions     1617424     1617424     1617424
+    Kernel: Phase3(int*, int, int)
+        625                              inst_integer                      Integer Instructions   517131296   517131296   517131296

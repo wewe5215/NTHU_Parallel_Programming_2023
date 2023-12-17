@@ -1,0 +1,14 @@
+srun: job 848061 queued and waiting for resources
+srun: job 848061 has been allocated resources
+==32434== NVPROF is profiling process 32434, command: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==32434== Profiling application: ./hw3-2 /home/pp23/share/hw3-2/cases/p24k1 p24k1.out
+==32434== Profiling result:
+==32434== Metric result:
+Invocations                               Metric Name                        Metric Description         Min         Max         Avg
+Device "NVIDIA GeForce GTX 1080 (0)"
+    Kernel: Phase1(int*, int, int)
+        375                   shared_store_throughput            Shared Memory Store Throughput  40.998GB/s  42.631GB/s  42.224GB/s
+    Kernel: Phase2(int*, int, int)
+        375                   shared_store_throughput            Shared Memory Store Throughput  1092.6GB/s  1174.3GB/s  1139.3GB/s
+    Kernel: Phase3(int*, int, int)
+        375                   shared_store_throughput            Shared Memory Store Throughput  268.49GB/s  273.61GB/s  272.38GB/s
