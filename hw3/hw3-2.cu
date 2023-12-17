@@ -61,7 +61,6 @@ __global__ void Phase1(int* d, int round, int V){
     __shared__ int shared[blocksize][blocksize];
     int i = threadIdx.x;
     int j = threadIdx.y;
-    // printf("round = %d, i = %d, j = %d\n", round, i, j);
     // real index in d
     int idx_x = i + round * blocksize;
     int idx_y = j + round * blocksize;
@@ -70,8 +69,6 @@ __global__ void Phase1(int* d, int round, int V){
     shared[j + 32][i] = d[idx_d + V * 32];
     shared[j][i + 32] = d[idx_d + 32];
     shared[j + 32][i + 32] = d[idx_d + V * 32 + 32];
-    // printf("d[%d][%d] = %d, d[%d][%d] = %d, d[%d][%d] = %d, d[%d][%d] = %d\n", idx_y, idx_x, shared[j][i], \
-    //     idx_y+32, idx_x, shared[j + 32][i], idx_y, idx_x+32, shared[j][i + 32], idx_y+32, idx_x+32, shared[j + 32][i + 32]);
     __syncthreads();
     // calculation
     #pragma unroll
@@ -88,13 +85,10 @@ __global__ void Phase1(int* d, int round, int V){
     d[idx_d + V * 32] = shared[j + 32][i];
     d[idx_d + 32] = shared[j][i + 32];
     d[idx_d + V * 32 + 32] = shared[j + 32][i + 32];
-    // printf("d[%d][%d] = %d, d[%d][%d] = %d, d[%d][%d] = %d, d[%d][%d] = %d\n", idx_y, idx_x, d[idx_d], \
-    //     idx_y+32, idx_x, d[idx_d + V * 32], idx_y, idx_x+32, d[idx_d + 32], idx_y+32, idx_x+32, d[idx_d + V * 32 + 32]);
 }
 
 __global__ void Phase2(int* d, int round, int V){
     if(round == blockIdx.y)return;
-    // printf("blockIdx.x = %d, blockIdx.y = %d\n", blockIdx.x, blockIdx.y);
     // put data to shared memory
     __shared__ int pivot[blocksize][blocksize];
     __shared__ int row[blocksize][blocksize];
@@ -153,7 +147,6 @@ __global__ void Phase2(int* d, int round, int V){
 
 __global__ void Phase3(int* d, int round, int V){
     // put data to shared memory
-    // printf("blockIdx.x = %d, blockIdx.y = %d\n", blockIdx.x, blockIdx.y);
     if(round == blockIdx.x || round == blockIdx.y)return;
     __shared__ int pivot[blocksize][blocksize];
     __shared__ int row[blocksize][blocksize];
@@ -233,6 +226,5 @@ int main(int argc, char** argv) {
 
     cudaMemcpy(d, device_d, d_size, cudaMemcpyDeviceToHost);
     handle_output(argv[2]);
-    // free(d);
     return 0;
 }
