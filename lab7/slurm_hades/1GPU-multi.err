@@ -1,0 +1,181 @@
+Using the `WANDB_DISABLED` environment variable is deprecated and will be removed in v5. Use the --report_to flag to control the integrations used for logging result (for instance --report_to none).
+/opt/python3.10/site-packages/datasets/load.py:2479: FutureWarning: 'use_auth_token' was deprecated in favor of 'token' in version 2.14.0 and will be removed in 3.0.0.
+You can remove this warning by passing 'token=<use_auth_token>' instead.
+  warnings.warn(
+Overwrite dataset info from restored data version if exists.
+Loading Dataset info from /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f
+Found cached dataset wikitext (/home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f)
+Loading Dataset info from /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f
+[INFO|configuration_utils.py:739] 2024-01-04 22:53:29,217 >> loading configuration file config.json from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/config.json
+[INFO|configuration_utils.py:802] 2024-01-04 22:53:29,219 >> Model config GPT2Config {
+  "_name_or_path": "gpt2",
+  "activation_function": "gelu_new",
+  "architectures": [
+    "GPT2LMHeadModel"
+  ],
+  "attn_pdrop": 0.1,
+  "bos_token_id": 50256,
+  "embd_pdrop": 0.1,
+  "eos_token_id": 50256,
+  "initializer_range": 0.02,
+  "layer_norm_epsilon": 1e-05,
+  "model_type": "gpt2",
+  "n_ctx": 1024,
+  "n_embd": 768,
+  "n_head": 12,
+  "n_inner": null,
+  "n_layer": 12,
+  "n_positions": 1024,
+  "reorder_and_upcast_attn": false,
+  "resid_pdrop": 0.1,
+  "scale_attn_by_inverse_layer_idx": false,
+  "scale_attn_weights": true,
+  "summary_activation": null,
+  "summary_first_dropout": 0.1,
+  "summary_proj_to_labels": true,
+  "summary_type": "cls_index",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 50
+    }
+  },
+  "transformers_version": "4.36.2",
+  "use_cache": true,
+  "vocab_size": 50257
+}
+
+[INFO|tokenization_auto.py:585] 2024-01-04 22:53:29,538 >> Could not locate the tokenizer configuration file, will try to use the model config instead.
+[INFO|configuration_utils.py:739] 2024-01-04 22:53:29,850 >> loading configuration file config.json from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/config.json
+[INFO|configuration_utils.py:802] 2024-01-04 22:53:29,852 >> Model config GPT2Config {
+  "_name_or_path": "gpt2",
+  "activation_function": "gelu_new",
+  "architectures": [
+    "GPT2LMHeadModel"
+  ],
+  "attn_pdrop": 0.1,
+  "bos_token_id": 50256,
+  "embd_pdrop": 0.1,
+  "eos_token_id": 50256,
+  "initializer_range": 0.02,
+  "layer_norm_epsilon": 1e-05,
+  "model_type": "gpt2",
+  "n_ctx": 1024,
+  "n_embd": 768,
+  "n_head": 12,
+  "n_inner": null,
+  "n_layer": 12,
+  "n_positions": 1024,
+  "reorder_and_upcast_attn": false,
+  "resid_pdrop": 0.1,
+  "scale_attn_by_inverse_layer_idx": false,
+  "scale_attn_weights": true,
+  "summary_activation": null,
+  "summary_first_dropout": 0.1,
+  "summary_proj_to_labels": true,
+  "summary_type": "cls_index",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 50
+    }
+  },
+  "transformers_version": "4.36.2",
+  "use_cache": true,
+  "vocab_size": 50257
+}
+
+[INFO|tokenization_utils_base.py:2026] 2024-01-04 22:53:30,523 >> loading file vocab.json from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/vocab.json
+[INFO|tokenization_utils_base.py:2026] 2024-01-04 22:53:30,523 >> loading file merges.txt from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/merges.txt
+[INFO|tokenization_utils_base.py:2026] 2024-01-04 22:53:30,523 >> loading file tokenizer.json from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/tokenizer.json
+[INFO|tokenization_utils_base.py:2026] 2024-01-04 22:53:30,523 >> loading file added_tokens.json from cache at None
+[INFO|tokenization_utils_base.py:2026] 2024-01-04 22:53:30,523 >> loading file special_tokens_map.json from cache at None
+[INFO|tokenization_utils_base.py:2026] 2024-01-04 22:53:30,523 >> loading file tokenizer_config.json from cache at None
+[INFO|configuration_utils.py:739] 2024-01-04 22:53:30,524 >> loading configuration file config.json from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/config.json
+[INFO|configuration_utils.py:802] 2024-01-04 22:53:30,526 >> Model config GPT2Config {
+  "_name_or_path": "gpt2",
+  "activation_function": "gelu_new",
+  "architectures": [
+    "GPT2LMHeadModel"
+  ],
+  "attn_pdrop": 0.1,
+  "bos_token_id": 50256,
+  "embd_pdrop": 0.1,
+  "eos_token_id": 50256,
+  "initializer_range": 0.02,
+  "layer_norm_epsilon": 1e-05,
+  "model_type": "gpt2",
+  "n_ctx": 1024,
+  "n_embd": 768,
+  "n_head": 12,
+  "n_inner": null,
+  "n_layer": 12,
+  "n_positions": 1024,
+  "reorder_and_upcast_attn": false,
+  "resid_pdrop": 0.1,
+  "scale_attn_by_inverse_layer_idx": false,
+  "scale_attn_weights": true,
+  "summary_activation": null,
+  "summary_first_dropout": 0.1,
+  "summary_proj_to_labels": true,
+  "summary_type": "cls_index",
+  "summary_use_proj": true,
+  "task_specific_params": {
+    "text-generation": {
+      "do_sample": true,
+      "max_length": 50
+    }
+  },
+  "transformers_version": "4.36.2",
+  "use_cache": true,
+  "vocab_size": 50257
+}
+
+[INFO|modeling_utils.py:3344] 2024-01-04 22:53:30,687 >> loading weights file model.safetensors from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/model.safetensors
+[INFO|configuration_utils.py:826] 2024-01-04 22:53:30,696 >> Generate config GenerationConfig {
+  "bos_token_id": 50256,
+  "eos_token_id": 50256
+}
+
+[INFO|modeling_utils.py:4185] 2024-01-04 22:53:31,009 >> All model checkpoint weights were used when initializing GPT2LMHeadModel.
+
+[INFO|modeling_utils.py:4193] 2024-01-04 22:53:31,009 >> All the weights of GPT2LMHeadModel were initialized from the model checkpoint at gpt2.
+If your task is similar to the task the model of the checkpoint was trained on, you can already use GPT2LMHeadModel for predictions without further training.
+[INFO|configuration_utils.py:781] 2024-01-04 22:53:31,334 >> loading configuration file generation_config.json from cache at /home/pp23/pp23s25/.cache/huggingface/hub/models--gpt2/snapshots/11c5a3d5811f50298f278a704980280950aedb10/generation_config.json
+[INFO|configuration_utils.py:826] 2024-01-04 22:53:31,334 >> Generate config GenerationConfig {
+  "bos_token_id": 50256,
+  "eos_token_id": 50256
+}
+
+Loading cached processed dataset at /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f/cache-4e8021e8ccf5ba6d.arrow
+Loading cached processed dataset at /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f/cache-6c03bd3e850fe8f9.arrow
+Loading cached processed dataset at /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f/cache-399c798545264225.arrow
+Loading cached processed dataset at /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f/cache-6af7ac5542249d36.arrow
+Loading cached processed dataset at /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f/cache-94eee1fd50cc2259.arrow
+Loading cached processed dataset at /home/pp23/pp23s25/.cache/huggingface/datasets/wikitext/wikitext-2-raw-v1/1.0.0/f5562967961a45407fa15044c5535a607200983f/cache-2444c150c4a8ef42.arrow
+[INFO|trainer.py:519] 2024-01-04 22:53:31,669 >> max_steps is given, it will override any value given in num_train_epochs
+[INFO|trainer.py:1706] 2024-01-04 22:53:32,542 >> ***** Running training *****
+[INFO|trainer.py:1707] 2024-01-04 22:53:32,542 >>   Num examples = 2,318
+[INFO|trainer.py:1708] 2024-01-04 22:53:32,542 >>   Num Epochs = 1
+[INFO|trainer.py:1709] 2024-01-04 22:53:32,542 >>   Instantaneous batch size per device = 1
+[INFO|trainer.py:1712] 2024-01-04 22:53:32,542 >>   Total train batch size (w. parallel, distributed & accumulation) = 1
+[INFO|trainer.py:1713] 2024-01-04 22:53:32,542 >>   Gradient Accumulation steps = 1
+[INFO|trainer.py:1714] 2024-01-04 22:53:32,542 >>   Total optimization steps = 200
+[INFO|trainer.py:1715] 2024-01-04 22:53:32,543 >>   Number of trainable parameters = 124,439,808
+  0%|          | 0/200 [00:00<?, ?it/s][W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+  0%|          | 1/200 [00:00<02:07,  1.56it/s]  1%|          | 2/200 [00:00<01:27,  2.27it/s]  2%|▏         | 3/200 [00:01<01:16,  2.57it/s]  2%|▏         | 4/200 [00:01<01:11,  2.74it/s]  2%|▎         | 5/200 [00:01<01:08,  2.85it/s]  3%|▎         | 6/200 [00:02<01:06,  2.92it/s]  4%|▎         | 7/200 [00:02<01:05,  2.96it/s]  4%|▍         | 8/200 [00:02<01:04,  2.98it/s]  4%|▍         | 9/200 [00:03<01:03,  3.00it/s]  5%|▌         | 10/200 [00:03<01:02,  3.02it/s]  6%|▌         | 11/200 [00:03<01:02,  3.03it/s]  6%|▌         | 12/200 [00:04<01:01,  3.04it/s]  6%|▋         | 13/200 [00:04<01:01,  3.05it/s]  7%|▋         | 14/200 [00:04<01:00,  3.05it/s]  8%|▊         | 15/200 [00:05<01:00,  3.06it/s]  8%|▊         | 16/200 [00:05<01:00,  3.06it/s]  8%|▊         | 17/200 [00:05<00:59,  3.06it/s]  9%|▉         | 18/200 [00:06<00:59,  3.05it/s] 10%|▉         | 19/200 [00:06<00:59,  3.06it/s] 10%|█         | 20/200 [00:06<00:59,  3.05it/s] 10%|█         | 21/200 [00:07<00:58,  3.05it/s] 11%|█         | 22/200 [00:07<00:58,  3.05it/s] 12%|█▏        | 23/200 [00:07<00:57,  3.05it/s] 12%|█▏        | 24/200 [00:08<00:57,  3.05it/s] 12%|█▎        | 25/200 [00:08<00:57,  3.05it/s] 13%|█▎        | 26/200 [00:08<00:57,  3.05it/s] 14%|█▎        | 27/200 [00:09<00:56,  3.05it/s] 14%|█▍        | 28/200 [00:09<00:56,  3.06it/s] 14%|█▍        | 29/200 [00:09<00:55,  3.06it/s] 15%|█▌        | 30/200 [00:10<00:55,  3.06it/s] 16%|█▌        | 31/200 [00:10<00:55,  3.06it/s] 16%|█▌        | 32/200 [00:10<00:54,  3.05it/s] 16%|█▋        | 33/200 [00:11<00:54,  3.06it/s] 17%|█▋        | 34/200 [00:11<00:54,  3.05it/s] 18%|█▊        | 35/200 [00:11<00:54,  3.05it/s] 18%|█▊        | 36/200 [00:12<00:53,  3.05it/s] 18%|█▊        | 37/200 [00:12<00:53,  3.05it/s] 19%|█▉        | 38/200 [00:12<00:53,  3.05it/s] 20%|█▉        | 39/200 [00:13<00:52,  3.05it/s] 20%|██        | 40/200 [00:13<00:52,  3.05it/s] 20%|██        | 41/200 [00:13<00:52,  3.05it/s] 21%|██        | 42/200 [00:14<00:51,  3.05it/s] 22%|██▏       | 43/200 [00:14<00:51,  3.05it/s] 22%|██▏       | 44/200 [00:14<00:51,  3.05it/s] 22%|██▎       | 45/200 [00:15<00:50,  3.04it/s] 23%|██▎       | 46/200 [00:15<00:50,  3.04it/s] 24%|██▎       | 47/200 [00:15<00:50,  3.05it/s] 24%|██▍       | 48/200 [00:16<00:49,  3.05it/s] 24%|██▍       | 49/200 [00:16<00:49,  3.05it/s] 25%|██▌       | 50/200 [00:16<00:49,  3.05it/s] 26%|██▌       | 51/200 [00:16<00:48,  3.05it/s] 26%|██▌       | 52/200 [00:17<00:48,  3.05it/s] 26%|██▋       | 53/200 [00:17<00:48,  3.05it/s] 27%|██▋       | 54/200 [00:17<00:47,  3.05it/s] 28%|██▊       | 55/200 [00:18<00:47,  3.05it/s] 28%|██▊       | 56/200 [00:18<00:47,  3.05it/s] 28%|██▊       | 57/200 [00:18<00:46,  3.05it/s] 29%|██▉       | 58/200 [00:19<00:46,  3.05it/s] 30%|██▉       | 59/200 [00:19<00:46,  3.04it/s] 30%|███       | 60/200 [00:19<00:46,  3.04it/s] 30%|███       | 61/200 [00:20<00:45,  3.04it/s] 31%|███       | 62/200 [00:20<00:45,  3.04it/s] 32%|███▏      | 63/200 [00:20<00:45,  3.04it/s] 32%|███▏      | 64/200 [00:21<00:44,  3.04it/s] 32%|███▎      | 65/200 [00:21<00:44,  3.05it/s] 33%|███▎      | 66/200 [00:21<00:43,  3.05it/s] 34%|███▎      | 67/200 [00:22<00:43,  3.04it/s] 34%|███▍      | 68/200 [00:22<00:43,  3.05it/s] 34%|███▍      | 69/200 [00:22<00:42,  3.05it/s] 35%|███▌      | 70/200 [00:23<00:42,  3.06it/s] 36%|███▌      | 71/200 [00:23<00:42,  3.05it/s] 36%|███▌      | 72/200 [00:23<00:41,  3.05it/s] 36%|███▋      | 73/200 [00:24<00:41,  3.05it/s] 37%|███▋      | 74/200 [00:24<00:41,  3.05it/s] 38%|███▊      | 75/200 [00:24<00:40,  3.05it/s] 38%|███▊      | 76/200 [00:25<00:40,  3.04it/s] 38%|███▊      | 77/200 [00:25<00:40,  3.05it/s] 39%|███▉      | 78/200 [00:25<00:40,  3.04it/s] 40%|███▉      | 79/200 [00:26<00:39,  3.04it/s] 40%|████      | 80/200 [00:26<00:39,  3.05it/s] 40%|████      | 81/200 [00:26<00:39,  3.04it/s] 41%|████      | 82/200 [00:27<00:38,  3.04it/s] 42%|████▏     | 83/200 [00:27<00:38,  3.04it/s] 42%|████▏     | 84/200 [00:27<00:38,  3.05it/s] 42%|████▎     | 85/200 [00:28<00:37,  3.05it/s] 43%|████▎     | 86/200 [00:28<00:37,  3.05it/s] 44%|████▎     | 87/200 [00:28<00:37,  3.05it/s] 44%|████▍     | 88/200 [00:29<00:36,  3.05it/s] 44%|████▍     | 89/200 [00:29<00:36,  3.05it/s] 45%|████▌     | 90/200 [00:29<00:36,  3.05it/s] 46%|████▌     | 91/200 [00:30<00:35,  3.05it/s] 46%|████▌     | 92/200 [00:30<00:35,  3.05it/s] 46%|████▋     | 93/200 [00:30<00:35,  3.05it/s] 47%|████▋     | 94/200 [00:31<00:34,  3.05it/s] 48%|████▊     | 95/200 [00:31<00:34,  3.04it/s] 48%|████▊     | 96/200 [00:31<00:34,  3.05it/s] 48%|████▊     | 97/200 [00:32<00:33,  3.05it/s] 49%|████▉     | 98/200 [00:32<00:33,  3.05it/s] 50%|████▉     | 99/200 [00:32<00:33,  3.05it/s] 50%|█████     | 100/200 [00:33<00:32,  3.05it/s] 50%|█████     | 101/200 [00:33<00:32,  3.04it/s] 51%|█████     | 102/200 [00:33<00:32,  3.05it/s] 52%|█████▏    | 103/200 [00:34<00:31,  3.05it/s] 52%|█████▏    | 104/200 [00:34<00:31,  3.05it/s] 52%|█████▎    | 105/200 [00:34<00:31,  3.05it/s] 53%|█████▎    | 106/200 [00:35<00:30,  3.04it/s] 54%|█████▎    | 107/200 [00:35<00:30,  3.04it/s] 54%|█████▍    | 108/200 [00:35<00:30,  3.04it/s] 55%|█████▍    | 109/200 [00:36<00:29,  3.04it/s] 55%|█████▌    | 110/200 [00:36<00:29,  3.05it/s] 56%|█████▌    | 111/200 [00:36<00:29,  3.05it/s] 56%|█████▌    | 112/200 [00:37<00:28,  3.04it/s] 56%|█████▋    | 113/200 [00:37<00:28,  3.04it/s] 57%|█████▋    | 114/200 [00:37<00:28,  3.05it/s] 57%|█████▊    | 115/200 [00:38<00:27,  3.04it/s] 58%|█████▊    | 116/200 [00:38<00:27,  3.04it/s] 58%|█████▊    | 117/200 [00:38<00:27,  3.04it/s] 59%|█████▉    | 118/200 [00:38<00:26,  3.04it/s] 60%|█████▉    | 119/200 [00:39<00:26,  3.04it/s] 60%|██████    | 120/200 [00:39<00:26,  3.04it/s] 60%|██████    | 121/200 [00:39<00:25,  3.04it/s] 61%|██████    | 122/200 [00:40<00:25,  3.05it/s] 62%|██████▏   | 123/200 [00:40<00:25,  3.05it/s] 62%|██████▏   | 124/200 [00:40<00:24,  3.05it/s] 62%|██████▎   | 125/200 [00:41<00:24,  3.05it/s] 63%|██████▎   | 126/200 [00:41<00:24,  3.05it/s] 64%|██████▎   | 127/200 [00:41<00:23,  3.05it/s] 64%|██████▍   | 128/200 [00:42<00:23,  3.05it/s] 64%|██████▍   | 129/200 [00:42<00:23,  3.05it/s] 65%|██████▌   | 130/200 [00:42<00:22,  3.05it/s] 66%|██████▌   | 131/200 [00:43<00:22,  3.06it/s] 66%|██████▌   | 132/200 [00:43<00:22,  3.05it/s] 66%|██████▋   | 133/200 [00:43<00:21,  3.05it/s] 67%|██████▋   | 134/200 [00:44<00:21,  3.05it/s] 68%|██████▊   | 135/200 [00:44<00:21,  3.05it/s] 68%|██████▊   | 136/200 [00:44<00:21,  3.05it/s] 68%|██████▊   | 137/200 [00:45<00:20,  3.05it/s] 69%|██████▉   | 138/200 [00:45<00:20,  3.05it/s] 70%|██████▉   | 139/200 [00:45<00:20,  3.04it/s] 70%|███████   | 140/200 [00:46<00:19,  3.04it/s] 70%|███████   | 141/200 [00:46<00:19,  3.04it/s] 71%|███████   | 142/200 [00:46<00:19,  3.04it/s] 72%|███████▏  | 143/200 [00:47<00:18,  3.05it/s] 72%|███████▏  | 144/200 [00:47<00:18,  3.05it/s] 72%|███████▎  | 145/200 [00:47<00:18,  3.04it/s] 73%|███████▎  | 146/200 [00:48<00:17,  3.04it/s] 74%|███████▎  | 147/200 [00:48<00:17,  3.04it/s] 74%|███████▍  | 148/200 [00:48<00:17,  3.05it/s] 74%|███████▍  | 149/200 [00:49<00:16,  3.05it/s] 75%|███████▌  | 150/200 [00:49<00:16,  3.05it/s] 76%|███████▌  | 151/200 [00:49<00:16,  3.05it/s] 76%|███████▌  | 152/200 [00:50<00:15,  3.05it/s] 76%|███████▋  | 153/200 [00:50<00:15,  3.05it/s] 77%|███████▋  | 154/200 [00:50<00:15,  3.05it/s] 78%|███████▊  | 155/200 [00:51<00:14,  3.05it/s] 78%|███████▊  | 156/200 [00:51<00:14,  3.05it/s] 78%|███████▊  | 157/200 [00:51<00:14,  3.05it/s] 79%|███████▉  | 158/200 [00:52<00:13,  3.05it/s] 80%|███████▉  | 159/200 [00:52<00:13,  3.05it/s] 80%|████████  | 160/200 [00:52<00:13,  3.05it/s] 80%|████████  | 161/200 [00:53<00:12,  3.04it/s] 81%|████████  | 162/200 [00:53<00:12,  3.05it/s] 82%|████████▏ | 163/200 [00:53<00:12,  3.05it/s] 82%|████████▏ | 164/200 [00:54<00:11,  3.05it/s] 82%|████████▎ | 165/200 [00:54<00:11,  3.04it/s] 83%|████████▎ | 166/200 [00:54<00:11,  3.04it/s] 84%|████████▎ | 167/200 [00:55<00:10,  3.05it/s] 84%|████████▍ | 168/200 [00:55<00:10,  3.05it/s] 84%|████████▍ | 169/200 [00:55<00:10,  3.05it/s] 85%|████████▌ | 170/200 [00:56<00:09,  3.05it/s] 86%|████████▌ | 171/200 [00:56<00:09,  3.05it/s] 86%|████████▌ | 172/200 [00:56<00:09,  3.04it/s] 86%|████████▋ | 173/200 [00:57<00:08,  3.05it/s] 87%|████████▋ | 174/200 [00:57<00:08,  3.05it/s] 88%|████████▊ | 175/200 [00:57<00:08,  3.04it/s] 88%|████████▊ | 176/200 [00:58<00:07,  3.04it/s] 88%|████████▊ | 177/200 [00:58<00:07,  3.05it/s] 89%|████████▉ | 178/200 [00:58<00:07,  3.04it/s] 90%|████████▉ | 179/200 [00:59<00:06,  3.04it/s] 90%|█████████ | 180/200 [00:59<00:06,  3.05it/s] 90%|█████████ | 181/200 [00:59<00:06,  3.04it/s] 91%|█████████ | 182/200 [00:59<00:05,  3.04it/s] 92%|█████████▏| 183/200 [01:00<00:05,  3.04it/s] 92%|█████████▏| 184/200 [01:00<00:05,  3.04it/s] 92%|█████████▎| 185/200 [01:00<00:04,  3.04it/s] 93%|█████████▎| 186/200 [01:01<00:04,  3.04it/s] 94%|█████████▎| 187/200 [01:01<00:04,  3.04it/s] 94%|█████████▍| 188/200 [01:01<00:03,  3.04it/s] 94%|█████████▍| 189/200 [01:02<00:03,  3.04it/s] 95%|█████████▌| 190/200 [01:02<00:03,  3.04it/s] 96%|█████████▌| 191/200 [01:02<00:02,  3.04it/s] 96%|█████████▌| 192/200 [01:03<00:02,  3.04it/s] 96%|█████████▋| 193/200 [01:03<00:02,  3.05it/s] 97%|█████████▋| 194/200 [01:03<00:01,  3.05it/s] 98%|█████████▊| 195/200 [01:04<00:01,  3.05it/s] 98%|█████████▊| 196/200 [01:04<00:01,  3.05it/s] 98%|█████████▊| 197/200 [01:04<00:00,  3.05it/s] 99%|█████████▉| 198/200 [01:05<00:00,  3.04it/s]100%|█████████▉| 199/200 [01:05<00:00,  3.05it/s]100%|██████████| 200/200 [01:05<00:00,  3.04it/s][INFO|trainer.py:1947] 2024-01-04 22:54:38,458 >> 
+
+Training completed. Do not forget to share your model on huggingface.co/models =)
+
+
+                                                 100%|██████████| 200/200 [01:05<00:00,  3.04it/s]100%|██████████| 200/200 [01:05<00:00,  3.03it/s]
+[INFO|trainer.py:2889] 2024-01-04 22:54:38,502 >> Saving model checkpoint to /home/pp23/pp23s25/GPT_DDP_weights
+[INFO|configuration_utils.py:483] 2024-01-04 22:54:38,506 >> Configuration saved in /home/pp23/pp23s25/GPT_DDP_weights/config.json
+[INFO|configuration_utils.py:594] 2024-01-04 22:54:38,508 >> Configuration saved in /home/pp23/pp23s25/GPT_DDP_weights/generation_config.json
+[INFO|modeling_utils.py:2382] 2024-01-04 22:54:40,265 >> Model weights saved in /home/pp23/pp23s25/GPT_DDP_weights/pytorch_model.bin
+[INFO|tokenization_utils_base.py:2432] 2024-01-04 22:54:40,269 >> tokenizer config file saved in /home/pp23/pp23s25/GPT_DDP_weights/tokenizer_config.json
+[INFO|tokenization_utils_base.py:2441] 2024-01-04 22:54:40,271 >> Special tokens file saved in /home/pp23/pp23s25/GPT_DDP_weights/special_tokens_map.json
+[INFO|modelcard.py:452] 2024-01-04 22:54:40,956 >> Dropping the following result as it does not have all the necessary fields:
+{'task': {'name': 'Causal Language Modeling', 'type': 'text-generation'}, 'dataset': {'name': 'wikitext wikitext-2-raw-v1', 'type': 'wikitext', 'args': 'wikitext-2-raw-v1'}}
