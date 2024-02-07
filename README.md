@@ -1,3 +1,5 @@
+# Main barnch : Source code and report
+# Experiment branch : Experiment Results and Scripts
 # HW1 : Odd-Even Sort
 ## Scores:
 - Correctness: 35/35
