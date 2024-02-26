@@ -1,4 +1,4 @@
-# Main barnch : Source code and report
+# Main branch : Source code and report
 # Experiment branch : Experiment Results and Scripts
 # HW1 : Odd-Even Sort
 ## Scores:
