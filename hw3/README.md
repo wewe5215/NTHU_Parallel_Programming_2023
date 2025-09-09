@@ -14,7 +14,7 @@
     1. **Block Factor Calculation**: Determined based on shared memory size to ensure that all data for a block can fit within shared memory, avoiding spills to slower global memory.
     2. **Thread Workload Distribution**: When block factor = 64, each 64×64 block contains 4096 elements. Since each CUDA block supports max 1024 threads, each thread processes 4 elements
     3. **Memory Padding**: Applied padding to prevent shared memory bank conflicts
-    4. **Coalesced Memory Acces**: Ensured that global memory accesses are coalesced to improve memory throughput
+    4. **Coalesced Memory Access**: Ensured that global memory accesses are coalesced to improve memory throughput
 ## hw3-3: CUDA Optimization — Multi-GPU Version
 - Extend the CUDA version to run on multiple GPUs using OpenMP and thread management
 - Built upon the HW3-2 implementation with multi-threading and OpenMP
