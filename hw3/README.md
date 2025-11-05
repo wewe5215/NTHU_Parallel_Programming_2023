@@ -5,7 +5,7 @@
 - Inserted `pthread_barrier_wait` to synchronize all threads at the end of each vertex’s computation step
 
 ## hw3-2: CUDA Optimization — Single GPU Version
-- Use CUDA to optimize the APSP algorithm on a single GPU using the **Blocked Floyd-Warshall algorithm**
+- Use CUDA to optimize the Blocked Floyd-Warshall algorithm on a single GPU.
   - Implemented the three computation phases:
     - phase1: Independent computation within the pivot block
     - phase2: Computation for the pivot row and pivot column blocks
